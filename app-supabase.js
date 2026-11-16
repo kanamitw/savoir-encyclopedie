@@ -26,9 +26,15 @@ function renderAdminUsers(){
  const pending=adminUsers.filter(u=>u.approval_status==="pending").length;
  $("#adminUsersCount").textContent=adminUsers.length+" compte"+(adminUsers.length>1?"s":"")+" chargé"+(adminUsers.length>1?"s":"")+(pending?" · "+pending+" demande"+(pending>1?"s":"")+" à valider":"")+(term?" · "+filtered.length+" résultat(s)":"");
  $("#adminUsersTable").innerHTML=filtered.map(u=>{
-  const status=u.approval_status||"approved", label=status==="pending"?"En attente d’approbation":status==="rejected"?"Refusé":"Approuvé";
-  const actions=u.role==="admin"?"—":'<div class="admin-user-actions">'+(status!=="approved"?'<button type="button" class="btn btn-light" data-user-action="approve" data-user-id="'+esc(u.id)+'">Approuver</button>':"")+(status==="pending"?'<button type="button" class="btn btn-light" data-user-action="reject" data-user-id="'+esc(u.id)+'">Refuser</button>':"")+'</div>';
-  return '<tr><td>'+esc(u.display_name||"—")+'</td><td>'+esc(u.email||"—")+'</td><td>'+date(u.created_at)+'</td><td>'+(u.last_sign_in_at?date(u.last_sign_in_at):"Jamais")+'</td><td><span class="admin-role '+(u.role==="admin"?"is-admin":"")+'">'+(u.role==="admin"?"Administrateur":"Membre")+'</span></td><td>'+(u.confirmed?"Confirmé":"E-mail non confirmé")+'</td><td><span class="admin-approval-status '+status+'">'+label+'</span></td><td>'+actions+'</td></tr>';
+  const status=u.approval_status||"approved",label=status==="pending"?"En attente d’approbation":status==="rejected"?"Refusé":"Approuvé";
+  const admin=u.role==="admin",banned=Boolean(u.banned);
+  const actions=admin?"—":'<div class="admin-user-actions">'+
+   (status!=="approved"?'<button type="button" class="btn btn-light" data-user-action="approve" data-user-id="'+esc(u.id)+'">Approuver</button>':"")+
+   (status==="pending"?'<button type="button" class="btn btn-light" data-user-action="reject" data-user-id="'+esc(u.id)+'">Refuser</button>':"")+
+   (status==="approved"?'<button type="button" class="btn btn-light" data-user-action="edit-permission" data-permission="can_edit_articles" data-user-id="'+esc(u.id)+'">'+(u.can_edit_articles?"Retirer modification":"Autoriser modification")+'</button><button type="button" class="btn btn-light" data-user-action="delete-permission" data-permission="can_delete_articles" data-user-id="'+esc(u.id)+'">'+(u.can_delete_articles?"Retirer suppression":"Autoriser suppression")+'</button>':"")+
+   (status==="approved"?'<button type="button" class="btn '+(banned?"btn-light":"btn-dark")+'" data-user-action="'+(banned?"unban":"ban")+'" data-user-id="'+esc(u.id)+'">'+(banned?"Débannir":"Bannir")+'</button>':"")+
+   '</div>';
+  return '<tr><td>'+esc(u.display_name||"—")+'</td><td>'+esc(u.email||"—")+'</td><td>'+date(u.created_at)+'</td><td>'+(u.last_sign_in_at?date(u.last_sign_in_at):"Jamais")+'</td><td><span class="admin-role '+(admin?"is-admin":"")+'">'+(admin?"Administrateur":"Membre")+'</span></td><td>'+(u.confirmed?"Confirmé":"E-mail non confirmé")+'</td><td><span class="admin-approval-status '+status+'">'+label+'</span></td><td><span class="admin-ban-status '+(banned?"banned":"active")+'">'+(banned?"Banni":"Actif")+'</span></td><td><span class="admin-permission-status">'+(u.can_edit_articles?"Modification oui":"Modification non")+'<br>'+(u.can_delete_articles?"Suppression oui":"Suppression non")+'</span></td><td>'+actions+'</td></tr>';
  }).join("");
  $("#adminUsersTableWrap").hidden=filtered.length===0;
  if(!adminUsersLoading)$("#adminUsersMessage").hidden=filtered.length>0;
@@ -60,18 +66,32 @@ $("#adminUsersTable").addEventListener("click",async e=>{
  const button=e.target.closest("[data-user-action]");if(!button)return;
  if(!isAdmin())return;
  const action=button.dataset.userAction,id=button.dataset.userId;
- if(!confirm(action==="approve"?"Approuver ce compte ?":"Refuser cette inscription ?"))return;
+ const prompts={approve:"Approuver ce compte ?",reject:"Refuser cette inscription ?",ban:"Bannir ce compte ? La personne ne pourra plus se connecter.",unban:"Débannir ce compte ?","edit-permission":"Modifier le droit de modification ?","delete-permission":"Modifier le droit de suppression ?"};
+ if(!confirm(prompts[action]||"Confirmer cette action ?"))return;
  button.disabled=true;
  try{
-  const result=await sb.functions.invoke("admin-users",{body:{action,userId:id}});
+  let payload={action,userId:id};
+  if(action==="edit-permission"||action==="delete-permission"){
+   const target=adminUsers.find(u=>u.id===id);if(!target)throw new Error("Compte introuvable.");
+   const permission=button.dataset.permission;
+   payload={action:"permissions",userId:id,canEdit:permission==="can_edit_articles"?!target.can_edit_articles:target.can_edit_articles,canDelete:permission==="can_delete_articles"?!target.can_delete_articles:target.can_delete_articles};
+  }
+  const result=await sb.functions.invoke("admin-users",{body:payload});
   if(result.error)throw result.error;
   if(result.data?.error)throw new Error(result.data.error);
   await loadAdminUsers(true);
-  notice(action==="approve"?"Compte approuvé : la personne peut maintenant se connecter.":"Inscription refusée.");
+  const messages={approve:"Compte approuvé : la personne peut maintenant se connecter.",reject:"Inscription refusée.",ban:"Compte banni.",unban:"Compte débanni.","edit-permission":"Droit de modification mis à jour.","delete-permission":"Droit de suppression mis à jour."};
+  notice(messages[action]||"Modification enregistrée.");
  }catch(error){notice("Action impossible : "+(error.message||"erreur inconnue"));button.disabled=false}
 });
 function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;$("#articleForm").reset();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
-function read(id){const a=rows.find(x=>x.id===id);if(!a)return;const controls=user&&user.id===a.author_id?'<div class="read-actions"><button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button><button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button></div>':"";$("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()}
+function read(id){
+ const a=rows.find(x=>x.id===id);if(!a)return;
+ const canEdit=user&&user.id===a.author_id&&user.app_metadata?.can_edit_articles!==false;
+ const canDelete=user&&user.id===a.author_id&&user.app_metadata?.can_delete_articles!==false;
+ const controls=canEdit||canDelete?'<div class="read-actions">'+(canEdit?'<button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button>':"")+(canDelete?'<button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button>':"")+'</div>':"";
+ $("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()
+}
 $("#searchInput").addEventListener("input",e=>{query=e.target.value;draw()});
 $("#sortSelect").addEventListener("change",draw);
 $("#categorySelect").addEventListener("change",e=>{category=e.target.value;draw()});
