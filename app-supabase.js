@@ -22,9 +22,14 @@ async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#a
 function renderAdminUsers(){
  if(adminUsersError){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=adminUsersError;$("#adminUsersTableWrap").hidden=true;$("#loadMoreAdminUsers").hidden=true;return}
  const term=$("#adminUsersSearch").value.trim().toLowerCase();
- const filtered=adminUsers.filter(u=>(u.display_name+" "+u.email+" "+u.role).toLowerCase().includes(term));
- $("#adminUsersCount").textContent=adminUsers.length+" compte"+(adminUsers.length>1?"s":"")+" chargé"+(adminUsers.length>1?"s":"")+(term?" · "+filtered.length+" résultat(s)":"");
- $("#adminUsersTable").innerHTML=filtered.map(u=>'<tr><td>'+esc(u.display_name||"—")+'</td><td>'+esc(u.email||"—")+'</td><td>'+date(u.created_at)+'</td><td>'+(u.last_sign_in_at?date(u.last_sign_in_at):"Jamais")+'</td><td><span class="admin-role '+(u.role==="admin"?"is-admin":"")+'">'+(u.role==="admin"?"Administrateur":"Membre")+'</span></td><td>'+(u.confirmed?"Confirmé":"En attente")+'</td></tr>').join("");
+ const filtered=adminUsers.filter(u=>(u.display_name+" "+u.email+" "+u.role+" "+u.approval_status).toLowerCase().includes(term));
+ const pending=adminUsers.filter(u=>u.approval_status==="pending").length;
+ $("#adminUsersCount").textContent=adminUsers.length+" compte"+(adminUsers.length>1?"s":"")+" chargé"+(adminUsers.length>1?"s":"")+(pending?" · "+pending+" demande"+(pending>1?"s":"")+" à valider":"")+(term?" · "+filtered.length+" résultat(s)":"");
+ $("#adminUsersTable").innerHTML=filtered.map(u=>{
+  const status=u.approval_status||"approved", label=status==="pending"?"En attente d’approbation":status==="rejected"?"Refusé":"Approuvé";
+  const actions=u.role==="admin"?"—":'<div class="admin-user-actions">'+(status!=="approved"?'<button type="button" class="btn btn-light" data-user-action="approve" data-user-id="'+esc(u.id)+'">Approuver</button>':"")+(status==="pending"?'<button type="button" class="btn btn-light" data-user-action="reject" data-user-id="'+esc(u.id)+'">Refuser</button>':"")+'</div>';
+  return '<tr><td>'+esc(u.display_name||"—")+'</td><td>'+esc(u.email||"—")+'</td><td>'+date(u.created_at)+'</td><td>'+(u.last_sign_in_at?date(u.last_sign_in_at):"Jamais")+'</td><td><span class="admin-role '+(u.role==="admin"?"is-admin":"")+'">'+(u.role==="admin"?"Administrateur":"Membre")+'</span></td><td>'+(u.confirmed?"Confirmé":"E-mail non confirmé")+'</td><td><span class="admin-approval-status '+status+'">'+label+'</span></td><td>'+actions+'</td></tr>';
+ }).join("");
  $("#adminUsersTableWrap").hidden=filtered.length===0;
  if(!adminUsersLoading)$("#adminUsersMessage").hidden=filtered.length>0;
  if(!filtered.length&&!adminUsersLoading){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=term?"Aucun compte ne correspond à cette recherche.":"Aucun compte trouvé."}
@@ -50,6 +55,21 @@ async function loadAdminUsers(reset=false){
 $("#adminUsersSearch").addEventListener("input",renderAdminUsers);
 $("#refreshAdminUsers").addEventListener("click",()=>loadAdminUsers(true));
 $("#loadMoreAdminUsers").addEventListener("click",()=>loadAdminUsers(false));
+
+$("#adminUsersTable").addEventListener("click",async e=>{
+ const button=e.target.closest("[data-user-action]");if(!button)return;
+ if(!isAdmin())return;
+ const action=button.dataset.userAction,id=button.dataset.userId;
+ if(!confirm(action==="approve"?"Approuver ce compte ?":"Refuser cette inscription ?"))return;
+ button.disabled=true;
+ try{
+  const result=await sb.functions.invoke("admin-users",{body:{action,userId:id}});
+  if(result.error)throw result.error;
+  if(result.data?.error)throw new Error(result.data.error);
+  await loadAdminUsers(true);
+  notice(action==="approve"?"Compte approuvé : la personne peut maintenant se connecter.":"Inscription refusée.");
+ }catch(error){notice("Action impossible : "+(error.message||"erreur inconnue"));button.disabled=false}
+});
 function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;$("#articleForm").reset();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
 function read(id){const a=rows.find(x=>x.id===id);if(!a)return;const controls=user&&user.id===a.author_id?'<div class="read-actions"><button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button><button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button></div>':"";$("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()}
 $("#searchInput").addEventListener("input",e=>{query=e.target.value;draw()});
@@ -204,8 +224,8 @@ $("#loginForm").addEventListener("submit",async e=>{
    if(!name){notice("Saisis un pseudo.");return}
    r=await sb.auth.signUp({email,password,options:{data:{display_name:name}}});
   }else r=await sb.auth.signInWithPassword({email,password});
-  if(r.error){notice("Connexion impossible : "+r.error.message);return}
-  if(signup&&!r.data.session){$("#loginDialog").close();notice("Vérifie tes e-mails pour confirmer ton compte.");return}
+  if(r.error){if(r.error.code==="user_banned")notice("Ton compte est en attente d’approbation par l’administrateur.");else notice("Connexion impossible : "+r.error.message);return}
+  if(signup){if(r.data.session)await sb.auth.signOut();$("#loginDialog").close();notice("Demande d’inscription envoyée. Confirme ton e-mail si demandé ; ton compte sera utilisable après approbation par l’administrateur.");return}
   user=r.data.user;
   if(!signup){
    const factors=await sb.auth.mfa.listFactors();
