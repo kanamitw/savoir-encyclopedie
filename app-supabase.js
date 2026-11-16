@@ -53,11 +53,11 @@ function draw(){
  $("#articleGrid").hidden=!allArticlesView;
  $("#emptyState").hidden=!allArticlesView||list.length>0;
  const heading=$("#articlesTitle");if(heading)heading.textContent=allArticlesView?"Tous les articles":"Articles recommandés";
- const back=$("#backToRecommendations"),toolbar=$("#allArticlesToolbar"),searchWrap=document.querySelector(".hero .search-wrap"),stats=document.querySelector(".hero .stats");
+ const back=$("#backToRecommendations"),topbarSlot=$("#topbarSearchSlot"),searchWrap=document.querySelector(".search-wrap"),stats=document.querySelector(".hero .stats");
  document.body.classList.toggle("all-articles-view",allArticlesView);
- if(toolbar&&searchWrap&&back){
-  toolbar.hidden=!allArticlesView;
-  if(allArticlesView){toolbar.append(searchWrap,back);back.hidden=false;}
+ if(topbarSlot&&searchWrap&&back){
+  topbarSlot.hidden=!allArticlesView;
+  if(allArticlesView){topbarSlot.append(searchWrap,back);back.hidden=false;}
   else{document.querySelector(".hero-copy").insertBefore(searchWrap,stats);document.querySelector(".section-heading").append(back);back.hidden=true;}
  }
  const controls=document.querySelector(".sort-controls");if(controls)controls.hidden=!allArticlesView;
