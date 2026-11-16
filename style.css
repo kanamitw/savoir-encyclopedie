@@ -742,3 +742,26 @@ body.all-articles-view .all-articles-toolbar #backToRecommendations{margin-left:
 body.all-articles-view .section-heading{align-items:center;margin-bottom:22px}
 body.all-articles-view .section-heading h2{font-size:23px}
 @media(max-width:650px){body.all-articles-view .articles-section{padding:14px 15px 36px}body.all-articles-view .all-articles-toolbar{gap:7px;flex-wrap:wrap}body.all-articles-view .all-articles-toolbar .search-wrap{max-width:none;flex:1 1 210px}body.all-articles-view .all-articles-toolbar #backToRecommendations{font-size:10px;padding:8px}}
+
+
+/* Recherche et retour intégrés à l'en-tête dans la vue complète */
+.topbar-search-slot{display:flex;align-items:center;gap:10px;flex:1;min-width:0;max-width:690px;margin:0 34px}
+.topbar-search-slot[hidden]{display:none!important}
+.topbar-search-slot .search-wrap{flex:1;width:100%;max-width:440px;height:40px;margin:0;padding:0 12px;box-shadow:none}
+.topbar-search-slot .search-icon{font-size:19px;margin-right:9px}
+.topbar-search-slot .search-wrap input{font-size:12px}
+.topbar-search-slot #backToRecommendations{margin:0;padding:10px 13px;font-size:10px}
+.topbar .auth-status{margin-left:0}
+@media(max-width:760px){
+ .topbar-search-slot{margin:0 12px;gap:6px}
+ .topbar-search-slot .search-wrap{height:36px;padding:0 8px}
+ .topbar-search-slot #backToRecommendations{padding:8px;font-size:9px}
+}
+@media(max-width:560px){
+ .topbar{padding:0 12px;gap:8px}
+ .topbar-search-slot{margin:0;gap:5px}
+ .topbar-search-slot #backToRecommendations{white-space:normal;max-width:105px;line-height:1.2}
+ .topbar-search-slot .search-icon{display:none}
+ .topbar-search-slot .search-wrap input{font-size:10px}
+ .auth-status{display:none}
+}
