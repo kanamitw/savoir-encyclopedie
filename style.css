@@ -265,3 +265,15 @@ body[data-theme="dark"] .illustration-glint,
 body[data-theme="oled"] .illustration-glint{fill:#252525;stroke:#aaa}
 body[data-theme="dark"] .illustration-star,
 body[data-theme="oled"] .illustration-star{fill:#aaa}
+
+
+/* Globe numérique monochrome */
+.illustration-globe{fill:var(--surface);stroke:var(--ink);stroke-width:2.5}
+.illustration-longitude,.illustration-latitude{fill:none;stroke:var(--ink);stroke-width:1.8;opacity:.72}
+.illustration-node{fill:var(--ink)}
+body[data-theme="dark"] .illustration-globe,
+body[data-theme="oled"] .illustration-globe{fill:var(--surface);stroke:var(--ink)}
+body[data-theme="dark"] .illustration-longitude,
+body[data-theme="dark"] .illustration-latitude,
+body[data-theme="oled"] .illustration-longitude,
+body[data-theme="oled"] .illustration-latitude{stroke:var(--ink)}
