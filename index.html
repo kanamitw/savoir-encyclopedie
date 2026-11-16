@@ -54,8 +54,11 @@
   </dialog>
   <dialog id="accountDialog" class="modal account-modal">
     <div class="modal-head"><div><div class="eyebrow">ESPACE MEMBRE</div><h2>Mon compte</h2></div><button type="button" class="close-btn" data-close="accountDialog">×</button></div>
-    <p id="accountEmail" class="account-email"></p>
-    <button type="button" class="btn btn-dark full" id="accountLogout">Se déconnecter</button>
+    <div class="account-section"><h3>Nom d'utilisateur</h3><label for="accountUsername">Pseudo affiché</label><input id="accountUsername" maxlength="40" placeholder="Ton pseudo"><button type="button" class="btn btn-dark full" id="saveUsername">Enregistrer le pseudo</button></div>
+    <div class="account-section"><h3>Adresse e-mail</h3><p id="accountEmail" class="account-email"></p><label for="accountNewEmail">Nouvelle adresse e-mail</label><input id="accountNewEmail" type="email" autocomplete="email" placeholder="nouvelle-adresse@exemple.fr"><button type="button" class="btn btn-dark full" id="saveEmail">Modifier l'adresse e-mail</button><p class="form-note">Un e-mail de confirmation sera envoyé pour valider le changement.</p></div>
+    <div class="account-section"><h3>Mot de passe</h3><label for="accountNewPassword">Nouveau mot de passe</label><input id="accountNewPassword" type="password" minlength="8" autocomplete="new-password" placeholder="8 caractères minimum"><button type="button" class="btn btn-dark full" id="savePassword">Modifier le mot de passe</button></div>
+    <div class="account-section security-section"><h3>Double authentification</h3><p class="form-note">La vérification par code e-mail en deuxième étape n'est pas proposée nativement comme facteur MFA par Supabase. Cette option nécessite un mécanisme serveur dédié pour être réellement sécurisée.</p><p class="form-note">La double authentification TOTP (application d'authentification) est prise en charge nativement.</p></div>
+    <button type="button" class="btn btn-light full" id="accountLogout">Se déconnecter</button>
   </dialog>
   <div id="toast" class="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
