@@ -122,7 +122,7 @@ footer{padding:22px max(7vw,24px);display:flex;align-items:center;justify-conten
 .preview-oled{background:linear-gradient(90deg,#000 50%,#101010 50%)}
 body[data-theme="dark"]{--bg:#171a17;--surface:#222722;--ink:#edf0e9;--muted:#a3aa9e;--line:#343b33;--soft:#2b322a;--accent:#a4b797}
 body[data-theme="dark"] .topbar{background:#171a17ed}
-body[data-theme="dark"] .search-wrap,body[data-theme="dark"] .article-card,body[data-theme="dark"] .brand-mark,body[data-theme="dark"] .about-mark,body[data-theme="dark"] .modal input,body[data-theme="dark"] .modal select,body[data-theme="dark"] .modal textarea,body[data-theme="dark"] .sort-controls select,#sortSelect{background:var(--surface);color:var(--ink);border-color:var(--line)}
+body[data-theme="dark"] .search-wrap,body[data-theme="dark"] .article-card,body[data-theme="dark"] .brand-mark,body[data-theme="dark"] .about-mark,body[data-theme="dark"] .modal input,body[data-theme="dark"] .modal select,body[data-theme="dark"] .modal textarea,body[data-theme="dark"] .sort-controls select{background:var(--surface);color:var(--ink);border-color:var(--line)}
 body[data-theme="dark"] .contribute{background:#252d24;border-color:#343d32}
 body[data-theme="dark"] .tag{background:#303a2e;color:#c4d2bb}
 body[data-theme="dark"] .btn-dark{background:#e8ede4;color:#171a17}
