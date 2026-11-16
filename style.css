@@ -560,3 +560,19 @@ body[data-theme="christmas"]::after{
     linear-gradient(180deg,transparent 0 11px,#18251c 11px 13px,#b79a5d 13px 14px,transparent 15px) 0 0/100% 42px no-repeat;
   background-repeat:repeat-x;
 }
+
+/* Guirlande en véritables festons : câble en demi-cercles entre chaque point d'attache */
+body[data-theme="christmas"]::after{
+  height:48px;
+  background:
+    radial-gradient(ellipse 5px 7px at 24px 22px,#fff9d8 0 25%,#ffe38a 40%,#d99a36 66%,#70451e 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 72px 34px,#ffe6df 0 24%,#ff7770 42%,#c52e3d 68%,#70202a 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 120px 34px,#eaffed 0 24%,#8ee5a8 42%,#29945b 68%,#174d37 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 168px 22px,#fff9d8 0 25%,#ffe38a 40%,#d99a36 66%,#70451e 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 24px 16px,#c8a45a 0 70%,transparent 80%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 72px 28px,#c8a45a 0 70%,transparent 80%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 120px 28px,#c8a45a 0 70%,transparent 80%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 168px 16px,#c8a45a 0 70%,transparent 80%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 96px 38px at 96px -10px,transparent 68%,#18251c 69% 71%,#b79a5d 72% 73%,transparent 74%) 0 0/192px 48px repeat-x;
+  background-repeat:repeat-x;
+}
