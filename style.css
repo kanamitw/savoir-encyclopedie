@@ -765,3 +765,7 @@ body.all-articles-view .section-heading h2{font-size:23px}
  .topbar-search-slot .search-wrap input{font-size:10px}
  .auth-status{display:none}
 }
+
+.search-result-count{flex:0 0 auto;margin-left:12px;color:#858b7d;font:10px "DM Sans";white-space:nowrap}
+.topbar-search-slot .search-result-count{font-size:10px}
+@media(max-width:560px){.search-result-count{font-size:9px;margin-left:5px}}
