@@ -34,7 +34,7 @@ menuDropdown.addEventListener("click",e=>{
  if(!action)return;
  menuDropdown.hidden=true;menuToggle.setAttribute("aria-expanded","false");
  if(action==="settings")$("#settingsDialog").showModal();
- if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
+ if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountUsername").value=user.user_metadata?.display_name||"";$("#accountNewEmail").value="";$("#accountNewPassword").value="";$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
  if(action==="contribution")openWrite();
 });
 const applyTheme=theme=>{
@@ -46,7 +46,38 @@ const applyTheme=theme=>{
 };
 applyTheme(localStorage.getItem("savoir-theme")||"light");
 document.querySelectorAll("[data-theme-choice]").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.themeChoice)));
-$("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
+
+$("#saveUsername").addEventListener("click",async()=>{
+ if(!user)return;
+ const name=$("#accountUsername").value.trim();
+ if(name.length<2){notice("Le pseudo doit contenir au moins 2 caractères.");return}
+ const {data,error}=await sb.auth.updateUser({data:{display_name:name}});
+ if(error){notice("Erreur : "+error.message);return}
+ user=data.user;
+ const updated=await sb.from("articles").update({author_name:name}).eq("author_id",user.id);
+ if(updated.error){notice("Pseudo modifié, mais les anciens articles n'ont pas tous été actualisés.");}
+ else notice("Nom d'utilisateur mis à jour !");
+ await load();
+});
+$("#saveEmail").addEventListener("click",async()=>{
+ if(!user)return;
+ const email=$("#accountNewEmail").value.trim();
+ if(!email){notice("Saisis une nouvelle adresse e-mail.");return}
+ const {error}=await sb.auth.updateUser({email});
+ if(error){notice("Erreur : "+error.message);return}
+ $("#accountNewEmail").value="";
+ notice("E-mail de confirmation envoyé. Valide le changement depuis ta boîte mail.");
+});
+$("#savePassword").addEventListener("click",async()=>{
+ if(!user)return;
+ const password=$("#accountNewPassword").value;
+ if(password.length<8){notice("Choisis un mot de passe d'au moins 8 caractères.");return}
+ const {error}=await sb.auth.updateUser({password});
+ if(error){notice("Erreur : "+error.message);return}
+ $("#accountNewPassword").value="";
+ notice("Mot de passe modifié.");
+});
+\n$("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
 $("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
 $("#loginForm").addEventListener("submit",async e=>{
  e.preventDefault();const email=$("#email").value,password=$("#password").value,signup=$("#authMode").value==="signup";let r;
