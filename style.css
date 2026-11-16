@@ -416,3 +416,63 @@ body[data-theme="christmas"]::before{content:"";position:fixed;z-index:55;pointe
 @media(prefers-reduced-motion:reduce){body[data-theme="christmas"]::before{animation:none}}
 .preview-christmas{background:linear-gradient(135deg,#103b2b 0 42%,#a32335 42% 70%,#e3c16b 70%);position:relative}
 .preview-christmas:after{content:"";display:block;width:100%;height:5px;margin-top:5px;background:repeating-radial-gradient(circle,#ffe58a 0 2px,transparent 3px 12px)}
+
+
+/* Noël : tous les menus, fenêtres et champs en version sombre */
+body[data-theme="christmas"] .menu-dropdown,
+body[data-theme="christmas"] .modal,
+body[data-theme="christmas"] .settings-modal,
+body[data-theme="christmas"] .account-modal,
+body[data-theme="christmas"] #adminDialog,
+body[data-theme="christmas"] .modal form,
+body[data-theme="christmas"] .read-modal{
+ background:#10271f!important;color:#fff6e5!important;border-color:#b18a49!important;
+}
+body[data-theme="christmas"] .menu-dropdown button,
+body[data-theme="christmas"] .modal h2,
+body[data-theme="christmas"] .modal h3,
+body[data-theme="christmas"] .modal label,
+body[data-theme="christmas"] .modal p,
+body[data-theme="christmas"] .modal .eyebrow,
+body[data-theme="christmas"] .settings-description,
+body[data-theme="christmas"] .account-email,
+body[data-theme="christmas"] .form-note,
+body[data-theme="christmas"] .admin-users-heading,
+body[data-theme="christmas"] .admin-users-message,
+body[data-theme="christmas"] .admin-users-table td,
+body[data-theme="christmas"] .admin-users-table th{
+ color:#fff1d5!important;
+}
+body[data-theme="christmas"] .menu-dropdown button:hover{background:#214b37!important;color:#ffe09a!important}
+body[data-theme="christmas"] .modal input,
+body[data-theme="christmas"] .modal select,
+body[data-theme="christmas"] .modal textarea,
+body[data-theme="christmas"] .account-section input,
+body[data-theme="christmas"] .admin-users-search,
+body[data-theme="christmas"] .admin-users-table-wrap,
+body[data-theme="christmas"] .admin-users-table th{
+ background:#17382b!important;color:#fff6e5!important;border-color:#806b43!important;
+}
+body[data-theme="christmas"] .modal input::placeholder,
+body[data-theme="christmas"] .modal textarea::placeholder,
+body[data-theme="christmas"] .admin-users-search::placeholder{color:#c7bda7!important}
+body[data-theme="christmas"] .theme-option,
+body[data-theme="christmas"] .menu-trigger,
+body[data-theme="christmas"] .close-btn,
+body[data-theme="christmas"] .btn-light,
+body[data-theme="christmas"] .btn-quiet{
+ background:#17382b!important;color:#fff1d5!important;border-color:#b18a49!important;
+}
+body[data-theme="christmas"] .theme-option[aria-pressed="true"]{background:#54212a!important;border-color:#e2bd68!important}
+body[data-theme="christmas"] .theme-preview{border-color:#b18a49}
+body[data-theme="christmas"] .account-section{border-top-color:#806b43!important}
+body[data-theme="christmas"] .admin-users-table th,
+body[data-theme="christmas"] .admin-users-table td{border-bottom-color:#806b43!important}
+body[data-theme="christmas"] .admin-role{background:#214b37!important;color:#fff1d5!important}
+body[data-theme="christmas"] .admin-role.is-admin{background:#8f2635!important;color:#fff!important}
+body[data-theme="christmas"] .mfa-qr{background:#fff!important}
+body[data-theme="christmas"] .modal::backdrop{background:#020d09dd!important;backdrop-filter:blur(5px)}
+body[data-theme="christmas"] .modal .btn-dark{background:#8f2635!important;color:#fff!important;border:1px solid #d8b65d!important}
+body[data-theme="christmas"] .modal .btn-light:hover,
+body[data-theme="christmas"] .modal .btn-quiet:hover,
+body[data-theme="christmas"] .menu-trigger:hover{background:#24523b!important}
