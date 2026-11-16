@@ -204,3 +204,31 @@ body[data-theme="oled"] .btn-light:hover{
  .hero-illustration{max-width:245px;justify-self:center;margin-top:0}
 }
 @media(max-width:480px){.hero h1{font-size:39px;letter-spacing:-2.2px}}
+
+
+/* Mise en page définitive du bandeau : texte à gauche, illustration à droite */
+.hero{
+  width:100%;
+  max-width:1280px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);
+  align-items:center;
+  gap:clamp(28px,5vw,72px);
+  padding:76px clamp(28px,5vw,72px) 68px;
+  text-align:left;
+}
+.hero-copy{width:100%;max-width:620px;margin:0;text-align:left}
+.hero .eyebrow{justify-content:flex-start}
+.hero .search-wrap{margin:27px 0 0;max-width:520px;width:100%}
+.hero .stats{justify-content:flex-start;margin-top:25px;gap:28px}
+.hero-illustration{display:block;width:100%;max-width:440px;justify-self:end;align-self:center}
+.hero-illustration svg{display:block;width:100%;height:auto;overflow:visible}
+@media(max-width:760px){
+  .hero{grid-template-columns:1fr;gap:24px;padding:58px 22px 45px;text-align:center}
+  .hero-copy{margin:0 auto;text-align:center}
+  .hero .eyebrow{justify-content:center}
+  .hero .search-wrap{margin:24px auto 0}
+  .hero .stats{justify-content:center}
+  .hero-illustration{max-width:250px;justify-self:center}
+}
