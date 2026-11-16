@@ -13,8 +13,14 @@
 <body>
   <header class="topbar">
     <a class="brand" href="#" aria-label="Savoir, accueil"><span class="brand-mark">S</span><span>Savoir<span class="brand-dot">.</span></span></a>
-    <div class="top-actions"><button class="btn btn-quiet" id="loginBtn">Connexion</button><button class="btn btn-dark" id="writeTop">＋ Contribuer</button></div>
-    <button class="mobile-menu" id="mobileMenu" aria-label="Ouvrir le menu">☰</button>
+    <div class="menu-wrap">
+      <button class="menu-trigger" id="menuToggle" aria-expanded="false" aria-controls="menuDropdown">☰ Menu</button>
+      <div class="menu-dropdown" id="menuDropdown" hidden>
+        <button type="button" data-menu-action="settings">Réglages</button>
+        <button type="button" data-menu-action="account">Compte</button>
+        <button type="button" data-menu-action="contribution">Contribution</button>
+      </div>
+    </div>
   </header>
 
   <main id="accueil">
@@ -37,6 +43,20 @@
 
   <dialog id="readDialog" class="modal read-modal"><div class="modal-head"><div class="eyebrow">ARTICLE DE L'ENCYCLOPÉDIE</div><button type="button" class="close-btn" data-close="readDialog">×</button></div><div id="readContent"></div></dialog>
   <dialog id="loginDialog" class="modal"><form id="loginForm"><div class="modal-head"><div><div class="eyebrow">ESPACE MEMBRE</div><h2 id="loginTitle">Connexion</h2></div><button type="button" class="close-btn" data-close="loginDialog">×</button></div><label for="authMode">Action</label><select id="authMode"><option value="login">Se connecter</option><option value="signup">Créer un compte</option></select><div id="displayNameWrap" hidden><label for="displayName">Nom affiché</label><input id="displayName" maxlength="40" placeholder="Ton pseudo"></div><label for="email">Adresse e-mail</label><input id="email" type="email" required autocomplete="email" placeholder="eleve@exemple.fr"><label for="password">Mot de passe</label><input id="password" type="password" required minlength="6" autocomplete="current-password" placeholder="6 caractères minimum"><div class="form-note">Ton compte permet de publier des articles et de les retrouver sur tous tes appareils.</div><button class="btn btn-dark full" id="authSubmit" type="submit">Se connecter</button></form></dialog>
+  <dialog id="settingsDialog" class="modal settings-modal">
+    <div class="modal-head"><div><div class="eyebrow">PERSONNALISATION</div><h2>Réglages</h2></div><button type="button" class="close-btn" data-close="settingsDialog">×</button></div>
+    <p class="settings-description">Choisis l'apparence du site.</p>
+    <div class="theme-options" role="group" aria-label="Thème du site">
+      <button type="button" class="theme-option" data-theme-choice="light" aria-pressed="false"><span class="theme-preview preview-light"></span><span>Clair</span></button>
+      <button type="button" class="theme-option" data-theme-choice="dark" aria-pressed="false"><span class="theme-preview preview-dark"></span><span>Sombre</span></button>
+      <button type="button" class="theme-option" data-theme-choice="oled" aria-pressed="false"><span class="theme-preview preview-oled"></span><span>OLED</span></button>
+    </div>
+  </dialog>
+  <dialog id="accountDialog" class="modal">
+    <div class="modal-head"><div><div class="eyebrow">ESPACE MEMBRE</div><h2>Mon compte</h2></div><button type="button" class="close-btn" data-close="accountDialog">×</button></div>
+    <p id="accountEmail" class="account-email"></p>
+    <button type="button" class="btn btn-dark full" id="accountLogout">Se déconnecter</button>
+  </dialog>
   <div id="toast" class="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
