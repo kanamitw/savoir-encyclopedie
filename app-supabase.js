@@ -1,7 +1,7 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const TERMS_VERSION="1.0";
 const $=s=>document.querySelector(s);
-let rows=[],user=null,category="Tous",query="",currentEditingId=null,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="";
+let rows=[],user=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="";
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
@@ -35,8 +35,9 @@ function renderRecommendations(){
   const age=Math.max(0,(Date.now()-new Date(a.created_at).getTime())/86400000);
   score+=0.25*Math.exp(-age/180);
   return {article:a,score};
- }).sort((a,b)=>b.score-a.score||new Date(b.article.created_at)-new Date(a.article.created_at)).slice(0,3);
- grid.innerHTML=ranked.map(x=>articleCard(x.article)).join("");
+ }).sort((a,b)=>b.score-a.score||new Date(b.article.created_at)-new Date(a.article.created_at));
+ grid.innerHTML=ranked.slice(0,recommendationsLimit).map(x=>articleCard(x.article)).join("");
+ const more=$("#showMoreRecommendations");if(more)more.hidden=ranked.length<=recommendationsLimit;
  panel.hidden=ranked.length===0;
 }
 function draw(){
@@ -350,6 +351,7 @@ $("#articleForm").addEventListener("submit",async e=>{
  const wasEditing=Boolean(currentEditingId);currentEditingId=null;$("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice(wasEditing?"Article modifié !":"Article publié pour tous les visiteurs !");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
+$("#showMoreRecommendations").addEventListener("click",()=>{recommendationsLimit+=5;renderRecommendations()});
 $("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
 sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
 (async()=>{await syncUser();await load()})();
