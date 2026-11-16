@@ -146,7 +146,14 @@ function read(id){
  const controls=canEdit||canDelete?'<div class="read-actions">'+(canEdit?'<button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button>':"")+(canDelete?'<button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button>':"")+'</div>':"";
  $("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()
 }
-$("#searchInput").addEventListener("input",e=>{query=e.target.value;if(query.trim())allArticlesView=true;draw()});
+$("#searchInput").addEventListener("input",()=>{});
+$("#searchInput").addEventListener("keydown",e=>{
+ if(e.key!=="Enter")return;
+ e.preventDefault();
+ query=e.currentTarget.value.trim();
+ if(query)allArticlesView=true;
+ draw();
+});
 $("#sortSelect").addEventListener("change",draw);
 $("#categorySelect").addEventListener("change",e=>{category=e.target.value;draw()});
 document.addEventListener("click",async e=>{
