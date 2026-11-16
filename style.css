@@ -611,3 +611,34 @@ body[data-theme="christmas"]::after{
     radial-gradient(ellipse 96px 38px at 96px -10px,transparent 68%,#18251c 69% 71%,#b79a5d 72% 73%,transparent 74%) 0 0/192px 48px repeat-x;
   background-repeat:repeat-x;
 }
+
+
+/* Guirlande de Noël fixe : câble festonné et ampoules immobiles */
+body[data-theme="christmas"]::after{
+  content:"";
+  position:fixed;
+  z-index:60;
+  pointer-events:none;
+  top:0;
+  left:0;
+  right:0;
+  height:52px;
+  transform:none!important;
+  animation:none!important;
+  opacity:1!important;
+  filter:drop-shadow(0 2px 3px #0008)!important;
+  background:
+    radial-gradient(ellipse 6px 8px at 0px 5px,#fff8cf 0 24%,#ffd66e 42%,#c58a2b 72%,#5d3b1b 88%,transparent 92%) 0 0/180px 52px repeat-x,
+    radial-gradient(ellipse 6px 8px at 45px 29px,#ffe8e4 0 24%,#ff7770 42%,#c52e3d 72%,#70202a 88%,transparent 92%) 0 0/180px 52px repeat-x,
+    radial-gradient(ellipse 6px 8px at 90px 41px,#eaffed 0 24%,#8ee5a8 42%,#29945b 72%,#174d37 88%,transparent 92%) 0 0/180px 52px repeat-x,
+    radial-gradient(ellipse 6px 8px at 135px 29px,#fff8cf 0 24%,#ffd66e 42%,#c58a2b 72%,#5d3b1b 88%,transparent 92%) 0 0/180px 52px repeat-x,
+    radial-gradient(ellipse 4px 3px at 0px 0px,#d9b66b 0 60%,#654a28 80%,transparent 88%) 0 0/180px 52px repeat-x,
+    radial-gradient(ellipse 4px 3px at 45px 21px,#d9b66b 0 60%,#654a28 80%,transparent 88%) 0 0/180px 52px repeat-x,
+    radial-gradient(ellipse 4px 3px at 90px 33px,#d9b66b 0 60%,#654a28 80%,transparent 88%) 0 0/180px 52px repeat-x,
+    radial-gradient(ellipse 4px 3px at 135px 21px,#d9b66b 0 60%,#654a28 80%,transparent 88%) 0 0/180px 52px repeat-x,
+    radial-gradient(ellipse 90px 48px at 90px -4px,transparent 68%,#17251c 69% 71%,#b79a5d 72% 74%,transparent 75%) 0 0/180px 52px repeat-x;
+  background-repeat:repeat-x;
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-theme="christmas"]::after{animation:none!important}
+}
