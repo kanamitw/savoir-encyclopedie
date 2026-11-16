@@ -724,3 +724,7 @@ body[data-theme="christmas"] .recommendations{background:#10271f!important;borde
 body[data-theme="christmas"] .recommendations-heading p{color:#e7d9bd!important}
 body[data-theme="christmas"] .recommendations-reset{color:#fff1d5!important;border-color:#b18a49!important}
 @media(max-width:650px){.recommendations{padding:15px}.recommendations-heading{align-items:flex-start}.recommendations-heading h3{font-size:16px}}
+
+
+/* Les grilles d'articles doivent respecter l'attribut hidden malgré display:grid */
+.article-grid[hidden], .recommendations[hidden], .empty-state[hidden], [hidden]{display:none!important}
