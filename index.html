@@ -65,7 +65,19 @@
   <dialog id="adminDialog" class="modal">
     <div class="modal-head"><div><div class="eyebrow">ESPACE PRIVILÉGIÉ</div><h2>Administration</h2></div><button type="button" class="close-btn" data-close="adminDialog">×</button></div>
     <p class="settings-description">Bienvenue dans l’espace administrateur de Savoir.</p>
-    <div class="account-section"><h3>Compte administrateur</h3><p id="adminAccountEmail" class="account-email"></p><p class="form-note">Ton compte dispose du rôle administrateur. Les outils de gestion seront regroupés ici.</p></div>
+    <div class="account-section"><h3>Compte administrateur</h3><p id="adminAccountEmail" class="account-email"></p></div>
+    <section class="admin-users-section">
+      <div class="admin-users-heading"><div><h3>Comptes inscrits</h3><p id="adminUsersCount" class="form-note">Liste des utilisateurs de Savoir.</p></div><button type="button" class="btn btn-light" id="refreshAdminUsers">Actualiser</button></div>
+      <input type="search" id="adminUsersSearch" class="admin-users-search" placeholder="Rechercher un nom ou un e-mail…" autocomplete="off">
+      <div id="adminUsersMessage" class="admin-users-message" role="status">Chargement des comptes…</div>
+      <div class="admin-users-table-wrap" id="adminUsersTableWrap" hidden>
+        <table class="admin-users-table">
+          <thead><tr><th>Utilisateur</th><th>E-mail</th><th>Inscription</th><th>Dernière connexion</th><th>Rôle</th><th>Statut</th></tr></thead>
+          <tbody id="adminUsersTable"></tbody>
+        </table>
+      </div>
+      <button type="button" class="btn btn-light full" id="loadMoreAdminUsers" hidden>Afficher plus</button>
+    </section>
   </dialog>
   <dialog id="loginMfaDialog" class="modal"><div class="modal-head"><div><div class="eyebrow">SÉCURITÉ</div><h2>Vérification en deux étapes</h2></div></div><p class="muted">Saisis le code à 6 chiffres de ton application d'authentification.</p><label for="loginMfaCode">Code de vérification</label><input id="loginMfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button type="button" class="btn btn-dark full" id="verifyLoginMfa">Vérifier</button></dialog>
   <div id="toast" class="toast" role="status"></div>
