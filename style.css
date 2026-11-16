@@ -690,3 +690,23 @@ body[data-theme="christmas"] #articleGrid .article-card .tag{
 body[data-theme="christmas"] #articleGrid .article-card .article-arrow{
   color:#e6bd62!important;
 }
+
+
+/* Conditions d'utilisation : inscription et validation obligatoire */
+.terms-acceptance{margin:14px 0 4px;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--soft)}
+.terms-acceptance .terms-check{display:flex;align-items:flex-start;gap:9px;margin:0;font-size:11px;line-height:1.6;color:var(--ink)}
+.terms-acceptance .terms-check input{width:16px;height:16px;flex:0 0 16px;margin:1px 0 0;accent-color:var(--accent)}
+.terms-acceptance p{font-size:10px;line-height:1.5;color:var(--muted);margin:7px 0 0 25px}
+.text-link{display:inline;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.terms-dialog{padding:26px;max-height:min(82vh,760px)}
+.terms-content{font-size:12px;line-height:1.75;color:var(--ink)}
+.terms-content h3{font-size:13px;color:var(--ink);margin:18px 0 5px}
+.terms-content p{margin:6px 0 12px}
+.terms-gate{max-width:480px}
+body[data-theme="christmas"] .terms-acceptance{background:#17382b!important;border-color:#b18a49!important}
+body[data-theme="christmas"] .terms-acceptance .terms-check,
+body[data-theme="christmas"] .terms-acceptance p,
+body[data-theme="christmas"] .terms-content,
+body[data-theme="christmas"] .terms-content h3{color:#fff1d5!important}
+body[data-theme="christmas"] .terms-dialog{background:#10271f!important;color:#fff1d5!important;border-color:#b18a49!important}
+body[data-theme="christmas"] .text-link{color:#e6bd62!important}
