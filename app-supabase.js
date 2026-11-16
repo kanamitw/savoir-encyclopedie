@@ -100,7 +100,7 @@ $("#enableMfa").addEventListener("click",async()=>{
 $("#verifyMfa").addEventListener("click",async()=>{
  if(!pendingMfaFactor)return;
  const code=$("#mfaVerifyCode").value.trim();
- if(!/^\\d{6}$/.test(code)){notice("Saisis le code à 6 chiffres.");return}
+ if(!/^\d{6}$/.test(code)){notice("Saisis le code à 6 chiffres.");return}
  const challenge=await sb.auth.mfa.challenge({factorId:pendingMfaFactor.id});
  if(challenge.error){notice("Erreur : "+challenge.error.message);return}
  const result=await sb.auth.mfa.verify({factorId:pendingMfaFactor.id,challengeId:challenge.data.id,code});
@@ -140,7 +140,7 @@ $("#loginForm").addEventListener("submit",async e=>{
 $("#verifyLoginMfa").addEventListener("click",async()=>{
  if(!pendingMfaFactor?.challengeId)return;
  const code=$("#loginMfaCode").value.trim();
- if(!/^\\d{6}$/.test(code)){notice("Saisis le code à 6 chiffres.");return}
+ if(!/^\d{6}$/.test(code)){notice("Saisis le code à 6 chiffres.");return}
  const result=await sb.auth.mfa.verify({factorId:pendingMfaFactor.id,challengeId:pendingMfaFactor.challengeId,code});
  if(result.error){notice("Code incorrect ou expiré.");return}
  pendingMfaFactor=null;await syncUser();$("#loginMfaDialog").close();notice("Connexion sécurisée réussie.");
