@@ -335,3 +335,12 @@ body[data-theme="dark"] .admin-role.is-admin,body[data-theme="oled"] .admin-role
   #adminDialog.modal{padding:18px 14px}
   #adminDialog .admin-users-table-wrap{max-height:calc(100dvh - 390px)}
 }
+
+/* Validation manuelle des nouveaux comptes */
+.admin-approval-status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:650;white-space:nowrap}
+.admin-approval-status.approved{background:rgba(40,150,90,.13);color:#26834e}
+.admin-approval-status.pending{background:rgba(190,135,30,.16);color:#9b6b12}
+.admin-approval-status.rejected{background:rgba(190,55,55,.13);color:#b43d3d}
+.admin-user-actions{display:flex;gap:6px;flex-wrap:wrap}
+.admin-user-actions .btn{padding:7px 10px;font-size:12px;white-space:nowrap}
+@media(max-width:700px){.admin-users-table{min-width:1000px}}
