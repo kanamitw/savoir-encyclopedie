@@ -1,4 +1,5 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+const TERMS_VERSION="1.0";
 const $=s=>document.querySelector(s);
 let rows=[],user=null,category="Tous",query="",currentEditingId=null,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="";
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -19,7 +20,9 @@ async function load(){const r=await sb.from("articles").select("*").order("creat
 function isAdmin(){return user?.app_metadata?.role==="admin"}
 function updateAuthStatus(){const status=$("#authStatus");if(status){status.textContent=user?"Connecté":"Vous n’êtes pas connecté";status.classList.toggle("is-connected",Boolean(user));}}
 function updateAdminMenu(){updateAuthStatus();const item=$("#adminMenuItem");if(item){const visible=Boolean(user&&isAdmin());item.hidden=!visible;item.style.display=visible?"block":"none";item.setAttribute("aria-hidden",String(!visible));}const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
-async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu()}
+function hasAcceptedTerms(u=user){return u?.user_metadata?.terms_version===TERMS_VERSION}
+async function requireTermsAcceptance(){if(!user||hasAcceptedTerms())return;const dialog=$("#termsGateDialog");if(!dialog.open)dialog.showModal()}
+async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();await requireTermsAcceptance()}
 function renderAdminUsers(){
  if(adminUsersError){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=adminUsersError;$("#adminUsersTableWrap").hidden=true;$("#loadMoreAdminUsers").hidden=true;return}
  const term=$("#adminUsersSearch").value.trim().toLowerCase();
@@ -220,7 +223,19 @@ $("#disableMfa").addEventListener("click",async()=>{
 });
 
 $("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
-$("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#forgotPassword").hidden=yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
+$("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#termsAcceptanceWrap").hidden=!yes;$("#termsAccepted").required=yes;if(!yes)$("#termsAccepted").checked=false;$("#forgotPassword").hidden=yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
+$("#openTerms").addEventListener("click",()=>$("#termsDialog").showModal());
+$("#reviewTerms").addEventListener("click",()=>$("#termsDialog").showModal());
+$("#termsGateDialog").addEventListener("cancel",e=>e.preventDefault());
+$("#acceptTerms").addEventListener("click",async()=>{
+ const button=$("#acceptTerms");button.disabled=true;button.textContent="Enregistrement…";
+ try{
+  const {data,error}=await sb.auth.updateUser({data:{...(user?.user_metadata||{}),terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()}});
+  if(error)throw error;
+  user=data.user;updateAdminMenu();$("#termsGateDialog").close();notice("Conditions acceptées. Bienvenue sur Savoir !");
+ }catch(error){notice("Impossible d’enregistrer ton acceptation : "+(error?.message||"réessaie."));}
+ finally{button.disabled=false;button.textContent="J’accepte les conditions"}
+});
 $("#forgotPassword").addEventListener("click",async()=>{
  const email=$("#email").value.trim();
  if(!email){notice("Saisis d’abord l’adresse e-mail de ton compte.");$("#email").focus();return}
@@ -252,7 +267,7 @@ $("#loginForm").addEventListener("submit",async e=>{
   if(signup){
    const name=$("#displayName").value.trim();
    if(!name){notice("Saisis un pseudo.");return}
-   r=await sb.auth.signUp({email,password,options:{data:{display_name:name}}});
+   if(!$("#termsAccepted").checked){notice("Tu dois accepter les conditions d’utilisation pour créer un compte.");return}r=await sb.auth.signUp({email,password,options:{data:{display_name:name,terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()}}});
   }else r=await sb.auth.signInWithPassword({email,password});
   if(r.error){if(r.error.code==="user_banned")notice("Ton compte est en attente d’approbation par l’administrateur.");else notice("Connexion impossible : "+r.error.message);return}
   if(signup){if(r.data.session)await sb.auth.signOut({scope:"local"});$("#loginDialog").close();notice("Demande d’inscription envoyée. Confirme ton e-mail si demandé ; ton compte sera utilisable après approbation par l’administrateur.");return}
@@ -268,7 +283,7 @@ $("#loginForm").addEventListener("submit",async e=>{
     $("#loginDialog").close();$("#loginMfaCode").value="";$("#loginMfaDialog").showModal();return;
    }
   }
-  await syncUser();$("#loginDialog").close();notice("Connexion réussie.");
+  $("#loginDialog").close();await syncUser();if(hasAcceptedTerms())notice("Connexion réussie.");
  }catch(error){
   console.error("Erreur de connexion Savoir :",error);
   notice("Erreur de connexion : "+(error?.message||"réessaie dans quelques instants."));
@@ -282,7 +297,7 @@ $("#verifyLoginMfa").addEventListener("click",async()=>{
  if(!/^\d{6}$/.test(code)){notice("Saisis le code à 6 chiffres.");return}
  const result=await sb.auth.mfa.verify({factorId:pendingMfaFactor.id,challengeId:pendingMfaFactor.challengeId,code});
  if(result.error){notice("Code incorrect ou expiré.");return}
- pendingMfaFactor=null;await syncUser();$("#loginMfaDialog").close();notice("Connexion sécurisée réussie.");
+ pendingMfaFactor=null;$("#loginMfaDialog").close();await syncUser();if(hasAcceptedTerms())notice("Connexion sécurisée réussie.");
 });
 $("#articleForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!user){notice("Connecte-toi pour publier.");return}
