@@ -53,12 +53,12 @@ function draw(){
  $("#articleGrid").hidden=!allArticlesView;
  $("#emptyState").hidden=!allArticlesView||list.length>0;
  const heading=$("#articlesTitle");if(heading)heading.textContent=allArticlesView?"Tous les articles":"Articles recommandés";
- const back=$("#backToRecommendations"),topbarSlot=$("#topbarSearchSlot"),searchWrap=document.querySelector(".search-wrap"),stats=document.querySelector(".hero .stats");
+ const topbarSlot=$("#topbarSearchSlot"),searchWrap=document.querySelector(".search-wrap"),stats=document.querySelector(".hero .stats");
  document.body.classList.toggle("all-articles-view",allArticlesView);
- if(topbarSlot&&searchWrap&&back){
+ if(topbarSlot&&searchWrap){
   topbarSlot.hidden=!allArticlesView;
-  if(allArticlesView){topbarSlot.append(searchWrap,back);back.hidden=false;}
-  else{document.querySelector(".hero-copy").insertBefore(searchWrap,stats);document.querySelector(".section-heading").append(back);back.hidden=true;}
+  if(allArticlesView){topbarSlot.append(searchWrap);}
+  else{document.querySelector(".hero-copy").insertBefore(searchWrap,stats);}
  }
  const controls=document.querySelector(".sort-controls");if(controls)controls.hidden=!allArticlesView;
  renderRecommendations();
@@ -368,7 +368,7 @@ $("#articleForm").addEventListener("submit",async e=>{
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
 $("#showMoreRecommendations").addEventListener("click",()=>{allArticlesView=true;draw();window.scrollTo({top:0,behavior:"smooth"})});
-$("#backToRecommendations").addEventListener("click",()=>{allArticlesView=false;query="";$("#searchInput").value="";category="Tous";$("#categorySelect").value="Tous";draw();window.scrollTo({top:0,behavior:"smooth"})});
+
 $("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
 sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
 (async()=>{await syncUser();await load()})();
