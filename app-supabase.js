@@ -16,7 +16,7 @@ function draw(){
  $("#emptyState").hidden=list.length>0;
 }
 async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
-async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#loginBtn").textContent=user?"Déconnexion":"Connexion";$("#writeTop").textContent=user?"＋ Écrire un article":"＋ Se connecter"}
+async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):""}
 function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}$("#articleForm").reset();$("#articleDialog").showModal()}
 function read(id){const a=rows.find(x=>x.id===id);if(!a)return;$("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>';$("#readDialog").showModal()}
 $("#searchInput").addEventListener("input",e=>{query=e.target.value;draw()});
@@ -26,8 +26,27 @@ document.addEventListener("click",e=>{
  const card=e.target.closest(".article-card");if(card)read(card.dataset.id);
  const close=e.target.closest("[data-close]");if(close)$("#"+close.dataset.close).close();
 });
-$("#writeTop").addEventListener("click",openWrite);
-$("#loginBtn").addEventListener("click",async()=>{if(user){await sb.auth.signOut();user=null;await syncUser();notice("Déconnecté.")}else $("#loginDialog").showModal()});
+const menuToggle=$("#menuToggle"),menuDropdown=$("#menuDropdown");
+menuToggle.addEventListener("click",()=>{const open=menuDropdown.hidden;menuDropdown.hidden=!open;menuToggle.setAttribute("aria-expanded",String(open))});
+document.addEventListener("click",e=>{if(!e.target.closest(".menu-wrap")){menuDropdown.hidden=true;menuToggle.setAttribute("aria-expanded","false")}});
+menuDropdown.addEventListener("click",e=>{
+ const action=e.target.closest("[data-menu-action]")?.dataset.menuAction;
+ if(!action)return;
+ menuDropdown.hidden=true;menuToggle.setAttribute("aria-expanded","false");
+ if(action==="settings")$("#settingsDialog").showModal();
+ if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
+ if(action==="contribution")openWrite();
+});
+const applyTheme=theme=>{
+ const selected=["light","dark","oled"].includes(theme)?theme:"light";
+ if(selected==="light")delete document.body.dataset.theme;else document.body.dataset.theme=selected;
+ localStorage.setItem("savoir-theme",selected);
+ document.querySelectorAll("[data-theme-choice]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.themeChoice===selected)));
+ document.querySelector('meta[name="theme-color"]')?.setAttribute("content",selected==="oled"?"#000000":selected==="dark"?"#171a17":"#fafaf8");
+};
+applyTheme(localStorage.getItem("savoir-theme")||"light");
+document.querySelectorAll("[data-theme-choice]").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.themeChoice)));
+$("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
 $("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
 $("#loginForm").addEventListener("submit",async e=>{
  e.preventDefault();const email=$("#email").value,password=$("#password").value,signup=$("#authMode").value==="signup";let r;
@@ -45,6 +64,5 @@ $("#articleForm").addEventListener("submit",async e=>{
  $("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice("Article publié pour tous les visiteurs !");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
-$("#mobileMenu").addEventListener("click",()=>document.querySelector(".top-actions").classList.toggle("mobile-open"));
-sb.auth.onAuthStateChange((_e,s)=>{user=s?s.user:null;$("#loginBtn").textContent=user?"Déconnexion":"Connexion"});
+sb.auth.onAuthStateChange((_e,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):""});
 (async()=>{await syncUser();await load()})();
