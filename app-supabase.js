@@ -90,8 +90,9 @@ $("#adminUsersTable").addEventListener("click",async e=>{
 function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;$("#articleForm").reset();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
 function read(id){
  const a=rows.find(x=>x.id===id);if(!a)return;
- const canEdit=user&&user.id===a.author_id&&user.app_metadata?.can_edit_articles!==false;
- const canDelete=user&&user.id===a.author_id&&user.app_metadata?.can_delete_articles!==false;
+ const ownsArticle=Boolean(user&&user.id===a.author_id);
+ const canEdit=Boolean(user&&(ownsArticle||isAdmin()||user.app_metadata?.can_edit_articles===true));
+ const canDelete=Boolean(user&&(ownsArticle||isAdmin()||user.app_metadata?.can_delete_articles===true));
  const controls=canEdit||canDelete?'<div class="read-actions">'+(canEdit?'<button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button>':"")+(canDelete?'<button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button>':"")+'</div>':"";
  $("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()
 }
@@ -102,7 +103,12 @@ document.addEventListener("click",async e=>{
  const action=e.target.closest("[data-article-action]");
  if(action){
   const id=action.dataset.articleId,kind=action.dataset.articleAction,a=rows.find(x=>x.id===id);
-  if(!a||!user||a.author_id!==user.id){notice("Tu peux uniquement gérer tes propres articles.");return}
+  if(!a||!user){notice("Connecte-toi pour gérer cet article.");return}
+  const ownsArticle=a.author_id===user.id;
+  const mayEdit=ownsArticle||isAdmin()||user.app_metadata?.can_edit_articles===true;
+  const mayDelete=ownsArticle||isAdmin()||user.app_metadata?.can_delete_articles===true;
+  if(kind==="edit"&&!mayEdit){notice("Tu n’as pas le droit de modifier cet article.");return}
+  if(kind==="delete"&&!mayDelete){notice("Tu n’as pas le droit de supprimer cet article.");return}
   if(kind==="edit"){
    currentEditingId=id;$("#articleTitle").value=a.title;$("#articleCategory").value=a.category;$("#articleExcerpt").value=a.excerpt||"";$("#articleBody").value=a.body;
    $("#articleDialog").querySelector("h2").textContent="Modifier un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Enregistrer les modifications";
@@ -110,7 +116,7 @@ document.addEventListener("click",async e=>{
   }
   if(kind==="delete"){
    if(!confirm("Supprimer définitivement cet article ?"))return;
-   const result=await sb.from("articles").delete().eq("id",id).eq("author_id",user.id).select("id").maybeSingle();
+   const result=await sb.from("articles").delete().eq("id",id).select("id").maybeSingle();
    if(result.error){notice("Suppression impossible : "+result.error.message);return}
    if(!result.data){notice("Article introuvable ou tu n’en es pas l’auteur.");return}
    $("#readDialog").close();await load();notice("Article supprimé.");return;
@@ -283,7 +289,7 @@ $("#articleForm").addEventListener("submit",async e=>{
  const payload={title:$("#articleTitle").value.trim(),category:$("#articleCategory").value,excerpt:$("#articleExcerpt").value.trim()||body.slice(0,135),body:body};
  let r;
  if(currentEditingId){
-  r=await sb.from("articles").update(payload).eq("id",currentEditingId).eq("author_id",user.id).select("id").maybeSingle();
+  r=await sb.from("articles").update(payload).eq("id",currentEditingId).select("id").maybeSingle();
   if(r.error){notice("Modification impossible : "+r.error.message);return}
   if(!r.data){notice("Article introuvable ou tu n’en es pas l’auteur.");return}
  }else{
