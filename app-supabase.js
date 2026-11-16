@@ -26,7 +26,7 @@ document.addEventListener("click",e=>{
  const card=e.target.closest(".article-card");if(card)read(card.dataset.id);
  const close=e.target.closest("[data-close]");if(close)$("#"+close.dataset.close).close();
 });
-["writeTop","writeBottom"].forEach(id=>$("#"+id).addEventListener("click",openWrite));
+$("#writeTop").addEventListener("click",openWrite);
 $("#loginBtn").addEventListener("click",async()=>{if(user){await sb.auth.signOut();user=null;await syncUser();notice("Déconnecté.")}else $("#loginDialog").showModal()});
 $("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
 $("#loginForm").addEventListener("submit",async e=>{
