@@ -29,7 +29,7 @@ document.addEventListener("click",e=>{
 const menuToggle=$("#menuToggle"),menuDropdown=$("#menuDropdown");
 menuToggle.addEventListener("click",()=>{const open=menuDropdown.hidden;menuDropdown.hidden=!open;menuToggle.setAttribute("aria-expanded",String(open))});
 document.addEventListener("click",e=>{if(!e.target.closest(".menu-wrap")){menuDropdown.hidden=true;menuToggle.setAttribute("aria-expanded","false")}});
-menuDropdown.addEventListener("click",e=>{
+menuDropdown.addEventListener("click",async e=>{
  const action=e.target.closest("[data-menu-action]")?.dataset.menuAction;
  if(!action)return;
  menuDropdown.hidden=true;menuToggle.setAttribute("aria-expanded","false");
