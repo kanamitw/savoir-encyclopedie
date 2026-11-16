@@ -500,3 +500,24 @@ body[data-theme="christmas"] .article-result p{color:#d6cbb3!important}
 body[data-theme="christmas"] .article-card .tag,
 body[data-theme="christmas"] .article-preview .tag{background:#24523b!important;color:#f6e8c7!important;border-color:#b18a49!important}
 body[data-theme="christmas"] .article-card:hover{background:linear-gradient(145deg,#204b37,#153328)!important;border-color:#e0bd70!important}
+
+
+/* Guirlande de Noël : scintillement et léger mouvement au vent */
+body[data-theme="christmas"]::after{
+  transform-origin:top center;
+  animation:christmas-garland-sway 5.8s ease-in-out infinite,christmas-lights-twinkle 2.7s ease-in-out infinite;
+  will-change:transform,filter,opacity;
+}
+@keyframes christmas-garland-sway{
+  0%,100%{transform:rotate(-.45deg) translateY(0)}
+  50%{transform:rotate(.55deg) translateY(2px)}
+}
+@keyframes christmas-lights-twinkle{
+  0%,100%{filter:drop-shadow(0 0 4px rgba(255,214,105,.45)) brightness(.88);opacity:.88}
+  28%{filter:drop-shadow(0 0 9px rgba(255,224,130,.95)) brightness(1.35);opacity:1}
+  62%{filter:drop-shadow(0 0 5px rgba(255,214,105,.6)) brightness(1.02);opacity:.94}
+  78%{filter:drop-shadow(0 0 11px rgba(255,240,170,1)) brightness(1.5);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  body[data-theme="christmas"]::after{animation:none;transform:none;will-change:auto}
+}
