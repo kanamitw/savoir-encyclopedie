@@ -146,6 +146,12 @@ function read(id){
  const controls=canEdit||canDelete?'<div class="read-actions">'+(canEdit?'<button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button>':"")+(canDelete?'<button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button>':"")+'</div>':"";
  $("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()
 }
+const searchCount=$("#searchResultCount");
+$("#searchInput").addEventListener("input",e=>{
+ const term=e.currentTarget.value.trim().toLocaleLowerCase("fr");
+ const count=term?rows.filter(a=>(category==="Tous"||a.category===category)&&(a.title+" "+a.excerpt+" "+a.body+" "+a.category).toLocaleLowerCase("fr").includes(term)).length:rows.length;
+ if(searchCount)searchCount.textContent=term?count+" résultat"+(count>1?"s":""):"";
+});
 $("#searchInput").addEventListener("keydown",e=>{
  if(e.key!=="Enter")return;
  e.preventDefault();
