@@ -521,3 +521,27 @@ body[data-theme="christmas"]::after{
 @media(prefers-reduced-motion:reduce){
   body[data-theme="christmas"]::after{animation:none;transform:none;will-change:auto}
 }
+
+
+/* Guirlande plus réaliste : câble courbé, douilles et ampoules en verre */
+body[data-theme="christmas"]::after{
+  height:48px;
+  background:
+    radial-gradient(ellipse 5px 7px at 12px 27px,#fff9d8 0 28%,#ffe38a 42%,#d99a36 66%,#70451e 82%,transparent 88%) 0 0/48px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 36px 31px,#ffe6df 0 25%,#ff7770 43%,#c52e3d 68%,#70202a 82%,transparent 88%) 0 0/72px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 60px 25px,#eaffed 0 25%,#8ee5a8 43%,#29945b 68%,#174d37 82%,transparent 88%) 0 0/96px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 12px 19px,#c8a45a 0 70%,transparent 78%) 0 0/48px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 36px 23px,#c8a45a 0 70%,transparent 78%) 0 0/72px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 60px 17px,#c8a45a 0 70%,transparent 78%) 0 0/96px 48px repeat-x,
+    radial-gradient(ellipse at 50% -10%,transparent 0 67%,#18251c 68% 70%,#b79a5d 71% 72%,transparent 73%) 0 0/192px 43px repeat-x;
+  filter:drop-shadow(0 3px 3px #0009);
+}
+body[data-theme="christmas"]::after{
+  animation:christmas-garland-sway 7s ease-in-out infinite,christmas-lights-twinkle 3.4s ease-in-out infinite;
+}
+@keyframes christmas-lights-twinkle{
+  0%,100%{filter:drop-shadow(0 0 3px rgba(255,214,105,.35)) brightness(.86)}
+  23%{filter:drop-shadow(0 0 8px rgba(255,224,130,.9)) brightness(1.22)}
+  46%{filter:drop-shadow(0 0 4px rgba(255,214,105,.45)) brightness(.94)}
+  71%{filter:drop-shadow(0 0 10px rgba(255,240,170,.95)) brightness(1.3)}
+}
