@@ -176,6 +176,11 @@ document.addEventListener("click",async e=>{
  const card=e.target.closest(".article-card");if(card){const article=rows.find(x=>x.id===card.dataset.id);if(article){saveArticleClick(article);renderRecommendations();read(card.dataset.id)}}
  const close=e.target.closest("[data-close]");if(close)$("#"+close.dataset.close).close();
 });
+document.querySelector(".brand")?.addEventListener("click",e=>{
+ e.preventDefault();
+ if(allArticlesView){allArticlesView=false;query="";$("#searchInput").value="";draw();}
+ window.scrollTo({top:0,behavior:"smooth"});
+});
 const menuToggle=$("#menuToggle"),menuDropdown=$("#menuDropdown");
 menuToggle.addEventListener("click",()=>{const open=menuDropdown.hidden;menuDropdown.hidden=!open;menuToggle.setAttribute("aria-expanded",String(open))});
 document.addEventListener("click",e=>{if(!e.target.closest(".menu-wrap")){menuDropdown.hidden=true;menuToggle.setAttribute("aria-expanded","false")}});
