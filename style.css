@@ -172,3 +172,35 @@ body[data-theme="oled"] .btn-light:hover{
   background:var(--surface);
   border-color:var(--accent);
 }
+
+
+/* Illustration de loupe dans le bandeau principal */
+.hero{max-width:1180px;margin:0 auto;padding:76px 34px 68px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);align-items:center;gap:42px;text-align:left;min-height:420px}
+.hero-copy{max-width:620px;margin:0;text-align:left}
+.hero .eyebrow{justify-content:flex-start}
+.hero h1{font-size:clamp(42px,5.2vw,62px);line-height:1.08;letter-spacing:-3px;margin:19px 0 15px}
+.hero>p,.hero-copy>p{max-width:490px;margin:0;color:var(--muted);font-size:14px;line-height:1.8}
+.hero .search-wrap{margin:27px 0 0;max-width:520px;width:100%}
+.hero .stats{justify-content:flex-start;margin-top:25px;gap:28px}
+.hero .stat strong{color:var(--ink)}
+.hero-illustration{width:100%;max-width:410px;justify-self:end;position:relative}
+.hero-illustration svg{display:block;width:100%;height:auto;overflow:visible}
+.illustration-halo{fill:var(--soft)}
+.illustration-orbit{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:4 7}
+.illustration-page{fill:var(--surface);stroke:var(--line);stroke-width:2;stroke-linejoin:round}
+.illustration-line{fill:none;stroke:var(--muted);stroke-width:3;stroke-linecap:round;opacity:.55}
+.illustration-spine{fill:none;stroke:var(--line);stroke-width:3}
+.illustration-glass{fill:var(--surface);fill-opacity:.72;stroke:var(--accent);stroke-width:8}
+.illustration-handle{fill:none;stroke:var(--accent);stroke-width:15;stroke-linecap:round}
+.illustration-glint{fill:var(--soft);stroke:var(--accent);stroke-width:2;opacity:.9}
+.illustration-star{fill:var(--accent);opacity:.75}
+@media(max-width:760px){
+ .hero{grid-template-columns:1fr;gap:18px;padding:58px 22px 45px;text-align:center;min-height:0}
+ .hero-copy{margin:0 auto;text-align:center}
+ .hero .eyebrow{justify-content:center}
+ .hero>p,.hero-copy>p{margin:0 auto}
+ .hero .search-wrap{margin:24px auto 0}
+ .hero .stats{justify-content:center;gap:22px}
+ .hero-illustration{max-width:245px;justify-self:center;margin-top:0}
+}
+@media(max-width:480px){.hero h1{font-size:39px;letter-spacing:-2.2px}}
