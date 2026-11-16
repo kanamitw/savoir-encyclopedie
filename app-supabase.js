@@ -15,8 +15,8 @@ function draw(){
  $("#articleGrid").innerHTML=list.map(x=>'<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><span class="article-arrow">↗</span></div></article>').join("");
  $("#emptyState").hidden=list.length>0;
 }
-async function load(){if(!user){rows=[];draw();return}const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
-async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";return user}
+async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
+async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):""}
 function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;$("#articleForm").reset();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
 function read(id){const a=rows.find(x=>x.id===id);if(!a)return;const controls=user&&user.id===a.author_id?'<div class="read-actions"><button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button><button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button></div>':"";$("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()}
 $("#searchInput").addEventListener("input",e=>{query=e.target.value;draw()});
@@ -41,7 +41,7 @@ document.addEventListener("click",async e=>{
   }
  }
  const card=e.target.closest(".article-card");if(card)read(card.dataset.id);
- const close=e.target.closest("[data-close]");if(close){const target=$("#"+close.dataset.close);if(target.id==="loginDialog"&&!user){notice("Connecte-toi pour accéder au site.");return}target.close()}
+ const close=e.target.closest("[data-close]");if(close)$("#"+close.dataset.close).close();
 });
 const menuToggle=$("#menuToggle"),menuDropdown=$("#menuDropdown");
 menuToggle.addEventListener("click",()=>{const open=menuDropdown.hidden;menuDropdown.hidden=!open;menuToggle.setAttribute("aria-expanded",String(open))});
@@ -135,7 +135,7 @@ $("#disableMfa").addEventListener("click",async()=>{
  notice("Double authentification désactivée.");await refreshMfa();
 });
 
-$("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;rows=[];draw();$("#accountDialog").close();$("#loginDialog").showModal();notice("Déconnecté.")});
+$("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
 $("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#forgotPassword").hidden=yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
 $("#forgotPassword").addEventListener("click",async()=>{
  const email=$("#email").value.trim();
@@ -171,7 +171,7 @@ $("#loginForm").addEventListener("submit",async e=>{
    r=await sb.auth.signUp({email,password,options:{data:{display_name:name}}});
   }else r=await sb.auth.signInWithPassword({email,password});
   if(r.error){notice("Connexion impossible : "+r.error.message);return}
-  if(signup&&!r.data.session){notice("Vérifie tes e-mails pour confirmer ton compte, puis connecte-toi.");return}
+  if(signup&&!r.data.session){$("#loginDialog").close();notice("Vérifie tes e-mails pour confirmer ton compte.");return}
   user=r.data.user;
   if(!signup){
    const factors=await sb.auth.mfa.listFactors();
@@ -198,7 +198,7 @@ $("#verifyLoginMfa").addEventListener("click",async()=>{
  if(!/^\d{6}$/.test(code)){notice("Saisis le code à 6 chiffres.");return}
  const result=await sb.auth.mfa.verify({factorId:pendingMfaFactor.id,challengeId:pendingMfaFactor.challengeId,code});
  if(result.error){notice("Code incorrect ou expiré.");return}
- pendingMfaFactor=null;await syncUser();$("#loginMfaDialog").close();await load();notice("Connexion sécurisée réussie.");
+ pendingMfaFactor=null;await syncUser();$("#loginMfaDialog").close();notice("Connexion sécurisée réussie.");
 });
 $("#articleForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!user){notice("Connecte-toi pour publier.");return}
@@ -216,6 +216,5 @@ $("#articleForm").addEventListener("submit",async e=>{
  const wasEditing=Boolean(currentEditingId);currentEditingId=null;$("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice(wasEditing?"Article modifié !":"Article publié pour tous les visiteurs !");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
-sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal();if(event==="SIGNED_OUT"){rows=[];draw();if(!$("#loginDialog").open)$("#loginDialog").showModal()}else if(user&&(event==="SIGNED_IN"||event==="TOKEN_REFRESHED"))load()});
-$("#loginDialog").addEventListener("cancel",e=>{if(!user){e.preventDefault();notice("Connecte-toi pour accéder au site.")}});
-(async()=>{await syncUser();if(user)await load();else $("#loginDialog").showModal()})();
+sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
+(async()=>{await syncUser();await load()})();
