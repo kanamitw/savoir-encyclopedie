@@ -576,3 +576,21 @@ body[data-theme="christmas"]::after{
     radial-gradient(ellipse 96px 38px at 96px -10px,transparent 68%,#18251c 69% 71%,#b79a5d 72% 73%,transparent 74%) 0 0/192px 48px repeat-x;
   background-repeat:repeat-x;
 }
+
+
+/* Ampoules fixées au câble : coller les douilles au sommet de chaque lampe */
+body[data-theme="christmas"]::after{
+  background:
+    radial-gradient(ellipse 5px 7px at 24px 20px,#fff9d8 0 25%,#ffe38a 40%,#d99a36 66%,#70451e 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 72px 32px,#ffe6df 0 24%,#ff7770 42%,#c52e3d 68%,#70202a 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 120px 32px,#eaffed 0 24%,#8ee5a8 42%,#29945b 68%,#174d37 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 168px 20px,#fff9d8 0 25%,#ffe38a 40%,#d99a36 66%,#70451e 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    linear-gradient(180deg,transparent 0 13px,#b79a5d 13px 17px,#5d4526 17px 19px,transparent 19px) 0 0/192px 48px repeat-x,
+    linear-gradient(180deg,transparent 0 25px,#b79a5d 25px 29px,#5d4526 29px 31px,transparent 31px) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 24px 14px,#e6c77b 0 70%,transparent 80%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 72px 26px,#e6c77b 0 70%,transparent 80%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 120px 26px,#e6c77b 0 70%,transparent 80%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 3px 3px at 168px 14px,#e6c77b 0 70%,transparent 80%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 96px 38px at 96px -10px,transparent 68%,#18251c 69% 71%,#b79a5d 72% 73%,transparent 74%) 0 0/192px 48px repeat-x;
+  background-repeat:repeat-x;
+}
