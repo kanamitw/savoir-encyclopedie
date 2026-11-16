@@ -138,3 +138,15 @@ body[data-theme="oled"] .modal{background:#080808;color:var(--ink)}
 body[data-theme="oled"] .close-btn{background:#151515;color:var(--ink);border-color:var(--line)}
 body[data-theme="dark"] .modal::backdrop,body[data-theme="oled"] .modal::backdrop{background:#000b}
 @media(max-width:650px){.menu-trigger{padding:10px 12px}.menu-dropdown{width:180px}}
+
+
+/* Gestion du compte */
+.account-modal{padding:27px}
+.account-section{padding:15px 0;border-top:1px solid var(--line)}
+.account-section h3{font:700 13px Manrope;margin:0 0 9px}
+.account-section label{display:block;font-size:10px;font-weight:700;margin:10px 0 6px}
+.account-section input{width:100%;border:1px solid var(--line);border-radius:7px;padding:11px;font:12px "DM Sans";background:var(--surface);color:var(--ink)}
+.account-section .full{margin-top:9px}
+.account-section .form-note{margin:8px 0 0}
+.account-section.security-section{padding-bottom:18px}
+body[data-theme="dark"] .account-section input,body[data-theme="oled"] .account-section input{background:var(--surface);color:var(--ink);border-color:var(--line)}
