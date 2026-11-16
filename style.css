@@ -545,3 +545,18 @@ body[data-theme="christmas"]::after{
   46%{filter:drop-shadow(0 0 4px rgba(255,214,105,.45)) brightness(.94)}
   71%{filter:drop-shadow(0 0 10px rgba(255,240,170,.95)) brightness(1.3)}
 }
+
+
+/* Ajustement guirlande : ampoules remontées et douilles raccordées au câble */
+body[data-theme="christmas"]::after{
+  height:42px;
+  background:
+    radial-gradient(ellipse 5px 7px at 12px 21px,#fff9d8 0 28%,#ffe38a 42%,#d99a36 66%,#70451e 82%,transparent 88%) 0 0/48px 42px repeat-x,
+    radial-gradient(ellipse 5px 7px at 36px 25px,#ffe6df 0 25%,#ff7770 43%,#c52e3d 68%,#70202a 82%,transparent 88%) 0 0/72px 42px repeat-x,
+    radial-gradient(ellipse 5px 7px at 60px 19px,#eaffed 0 25%,#8ee5a8 43%,#29945b 68%,#174d37 82%,transparent 88%) 0 0/96px 42px repeat-x,
+    radial-gradient(ellipse 3px 3px at 12px 13px,#c8a45a 0 70%,transparent 78%) 0 0/48px 42px repeat-x,
+    radial-gradient(ellipse 3px 3px at 36px 17px,#c8a45a 0 70%,transparent 78%) 0 0/72px 42px repeat-x,
+    radial-gradient(ellipse 3px 3px at 60px 11px,#c8a45a 0 70%,transparent 78%) 0 0/96px 42px repeat-x,
+    linear-gradient(180deg,transparent 0 11px,#18251c 11px 13px,#b79a5d 13px 14px,transparent 15px) 0 0/100% 42px no-repeat;
+  background-repeat:repeat-x;
+}
