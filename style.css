@@ -294,3 +294,19 @@ body[data-theme="oled"] .illustration-latitude{stroke:var(--ink)}
  .hero .search-wrap{margin:24px auto 0}
  .hero .stats{justify-content:center;gap:22px}
 }
+
+/* Panel d'administration : liste des comptes */
+.admin-users-section{margin-top:20px}
+.admin-users-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.admin-users-heading h3{font:700 13px Manrope;margin:0}
+.admin-users-search{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px;background:var(--surface);color:var(--ink);font:12px "DM Sans";margin:8px 0 12px}
+.admin-users-message{font-size:12px;color:var(--muted);padding:18px 8px;text-align:center}
+.admin-users-table-wrap{overflow:auto;max-height:48vh;border:1px solid var(--line);border-radius:9px}
+.admin-users-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}
+.admin-users-table th,.admin-users-table td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
+.admin-users-table th{position:sticky;top:0;background:var(--soft);font-weight:700;color:var(--ink)}
+.admin-users-table td{color:var(--muted)}
+.admin-role{display:inline-block;border-radius:20px;padding:4px 8px;background:var(--soft);color:var(--ink);font-size:10px}
+.admin-role.is-admin{background:var(--ink);color:var(--surface)}
+body[data-theme="dark"] .admin-role.is-admin,body[data-theme="oled"] .admin-role.is-admin{background:#eee;color:#111}
+@media(max-width:560px){.admin-users-heading{align-items:flex-start}.admin-users-heading .btn{font-size:10px;padding:8px}.admin-users-table{font-size:10px}.admin-users-table th,.admin-users-table td{padding:9px}}
