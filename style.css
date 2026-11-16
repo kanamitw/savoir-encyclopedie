@@ -132,7 +132,7 @@ body[data-theme="dark"] .btn-dark{background:#e8ede4;color:#171a17}
 body[data-theme="dark"] .modal{background:var(--surface);color:var(--ink)}
 body[data-theme="dark"] .close-btn{background:var(--soft);color:var(--ink);border-color:var(--line)}
 body[data-theme="oled"]{--bg:#000;--surface:#080808;--ink:#f5f5f5;--muted:#a0a0a0;--line:#242424;--soft:#151515;--accent:#a8bd9a}
-body[data-theme="oled"] .topbar{background:#000;border-bottom-color:#242424;backdrop-filter:none}
+html:has(body[data-theme="oled"]),body[data-theme="oled"]{background:#000!important;color-scheme:dark}body[data-theme="oled"] .topbar{background:#000!important;background-color:#000!important;background-image:none!important;border-bottom:1px solid #242424!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;box-shadow:none!important;opacity:1!important}
 body[data-theme="oled"] .search-wrap,body[data-theme="oled"] .article-card,body[data-theme="oled"] .brand-mark,body[data-theme="oled"] .about-mark,body[data-theme="oled"] .modal input,body[data-theme="oled"] .modal select,body[data-theme="oled"] .modal textarea,body[data-theme="oled"] .sort-controls select,#sortSelect{background:var(--surface);color:var(--ink);border-color:var(--line)}
 body[data-theme="oled"] .contribute{background:#080808;border-color:#242424}
 body[data-theme="oled"] .tag{background:#171d15;color:#c4d2bb}
