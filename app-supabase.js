@@ -1,6 +1,6 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const $=s=>document.querySelector(s);
-let rows=[],user=null,category="Tous",query="",currentEditingId=null,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false;
+let rows=[],user=null,category="Tous",query="",currentEditingId=null,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="";
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
@@ -20,6 +20,7 @@ function isAdmin(){return user?.app_metadata?.role==="admin"}
 function updateAdminMenu(){const item=$("#adminMenuItem");if(item)item.hidden=!isAdmin();const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
 async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu()}
 function renderAdminUsers(){
+ if(adminUsersError){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=adminUsersError;$("#adminUsersTableWrap").hidden=true;$("#loadMoreAdminUsers").hidden=true;return}
  const term=$("#adminUsersSearch").value.trim().toLowerCase();
  const filtered=adminUsers.filter(u=>(u.display_name+" "+u.email+" "+u.role).toLowerCase().includes(term));
  $("#adminUsersCount").textContent=adminUsers.length+" compte"+(adminUsers.length>1?"s":"")+" chargé"+(adminUsers.length>1?"s":"")+(term?" · "+filtered.length+" résultat(s)":"");
@@ -31,7 +32,7 @@ function renderAdminUsers(){
 }
 async function loadAdminUsers(reset=false){
  if(!isAdmin()||adminUsersLoading)return;
- if(reset){adminUsers=[];adminUsersPage=0;adminUsersHasMore=false}
+ if(reset){adminUsers=[];adminUsersPage=0;adminUsersHasMore=false;adminUsersError=""}
  adminUsersLoading=true;$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent="Chargement des comptes…";$("#refreshAdminUsers").disabled=true;$("#loadMoreAdminUsers").disabled=true;
  try{
   const nextPage=adminUsersPage+1;
@@ -39,7 +40,7 @@ async function loadAdminUsers(reset=false){
   if(result.error)throw result.error;
   if(result.data?.error)throw new Error(result.data.error);
   const incoming=result.data?.users||[];
-  adminUsers.push(...incoming);adminUsersPage=nextPage;adminUsersHasMore=Boolean(result.data?.hasMore);
+  adminUsers.push(...incoming);adminUsersPage=nextPage;adminUsersHasMore=Boolean(result.data?.hasMore);adminUsersError="";
   $("#adminUsersMessage").hidden=true;renderAdminUsers();
  }catch(error){
   console.error("Erreur de chargement des comptes :",error);
