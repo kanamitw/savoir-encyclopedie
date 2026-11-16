@@ -476,3 +476,27 @@ body[data-theme="christmas"] .modal .btn-dark{background:#8f2635!important;color
 body[data-theme="christmas"] .modal .btn-light:hover,
 body[data-theme="christmas"] .modal .btn-quiet:hover,
 body[data-theme="christmas"] .menu-trigger:hover{background:#24523b!important}
+
+
+/* Cartes / aperçus d'articles : version sombre assortie au thème Noël */
+body[data-theme="christmas"] .article-card,
+body[data-theme="christmas"] .article-preview,
+body[data-theme="christmas"] .article-item,
+body[data-theme="christmas"] .article-result{
+ background:linear-gradient(145deg,#17382b,#10271f)!important;
+ color:#fff1d5!important;
+ border-color:#9b7544!important;
+}
+body[data-theme="christmas"] .article-card h3,
+body[data-theme="christmas"] .article-card strong,
+body[data-theme="christmas"] .article-preview h3,
+body[data-theme="christmas"] .article-item h3,
+body[data-theme="christmas"] .article-result h3{color:#fff1d5!important}
+body[data-theme="christmas"] .article-card p,
+body[data-theme="christmas"] .article-card .excerpt,
+body[data-theme="christmas"] .article-preview p,
+body[data-theme="christmas"] .article-item p,
+body[data-theme="christmas"] .article-result p{color:#d6cbb3!important}
+body[data-theme="christmas"] .article-card .tag,
+body[data-theme="christmas"] .article-preview .tag{background:#24523b!important;color:#f6e8c7!important;border-color:#b18a49!important}
+body[data-theme="christmas"] .article-card:hover{background:linear-gradient(145deg,#204b37,#153328)!important;border-color:#e0bd70!important}
