@@ -344,3 +344,12 @@ body[data-theme="dark"] .admin-role.is-admin,body[data-theme="oled"] .admin-role
 .admin-user-actions{display:flex;gap:6px;flex-wrap:wrap}
 .admin-user-actions .btn{padding:7px 10px;font-size:12px;white-space:nowrap}
 @media(max-width:700px){.admin-users-table{min-width:1000px}}
+
+/* Gestion des droits et bannissements dans l'administration */
+.admin-ban-status{display:inline-block;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:650;white-space:nowrap}
+.admin-ban-status.active{background:rgba(40,150,90,.13);color:#26834e}
+.admin-ban-status.banned{background:rgba(190,55,55,.13);color:#b43d3d}
+.admin-permission-status{font-size:12px;line-height:1.7;white-space:nowrap}
+.admin-user-actions{min-width:190px}
+.admin-users-table{min-width:1250px}
+.admin-user-actions .btn{margin:2px}
