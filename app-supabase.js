@@ -1,6 +1,6 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const $=s=>document.querySelector(s);
-let rows=[],user=null,category="Tous",query="",currentEditingId=null;
+let rows=[],user=null,category="Tous",query="",currentEditingId=null,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false;
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
@@ -19,6 +19,36 @@ async function load(){const r=await sb.from("articles").select("*").order("creat
 function isAdmin(){return user?.app_metadata?.role==="admin"}
 function updateAdminMenu(){const item=$("#adminMenuItem");if(item)item.hidden=!isAdmin();const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
 async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu()}
+function renderAdminUsers(){
+ const term=$("#adminUsersSearch").value.trim().toLowerCase();
+ const filtered=adminUsers.filter(u=>(u.display_name+" "+u.email+" "+u.role).toLowerCase().includes(term));
+ $("#adminUsersCount").textContent=adminUsers.length+" compte"+(adminUsers.length>1?"s":"")+" chargé"+(adminUsers.length>1?"s":"")+(term?" · "+filtered.length+" résultat(s)":"");
+ $("#adminUsersTable").innerHTML=filtered.map(u=>'<tr><td>'+esc(u.display_name||"—")+'</td><td>'+esc(u.email||"—")+'</td><td>'+date(u.created_at)+'</td><td>'+(u.last_sign_in_at?date(u.last_sign_in_at):"Jamais")+'</td><td><span class="admin-role '+(u.role==="admin"?"is-admin":"")+'">'+(u.role==="admin"?"Administrateur":"Membre")+'</span></td><td>'+(u.confirmed?"Confirmé":"En attente")+'</td></tr>').join("");
+ $("#adminUsersTableWrap").hidden=filtered.length===0;
+ if(!adminUsersLoading)$("#adminUsersMessage").hidden=filtered.length>0;
+ if(!filtered.length&&!adminUsersLoading){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=term?"Aucun compte ne correspond à cette recherche.":"Aucun compte trouvé."}
+ $("#loadMoreAdminUsers").hidden=!adminUsersHasMore;
+}
+async function loadAdminUsers(reset=false){
+ if(!isAdmin()||adminUsersLoading)return;
+ if(reset){adminUsers=[];adminUsersPage=0;adminUsersHasMore=false}
+ adminUsersLoading=true;$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent="Chargement des comptes…";$("#refreshAdminUsers").disabled=true;$("#loadMoreAdminUsers").disabled=true;
+ try{
+  const nextPage=adminUsersPage+1;
+  const result=await sb.functions.invoke("admin-users",{body:{page:nextPage,perPage:100}});
+  if(result.error)throw result.error;
+  if(result.data?.error)throw new Error(result.data.error);
+  const incoming=result.data?.users||[];
+  adminUsers.push(...incoming);adminUsersPage=nextPage;adminUsersHasMore=Boolean(result.data?.hasMore);
+  $("#adminUsersMessage").hidden=true;renderAdminUsers();
+ }catch(error){
+  console.error("Erreur de chargement des comptes :",error);
+  $("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent="Impossible de charger les comptes : "+(error.message||"erreur inconnue")+".";
+ }finally{adminUsersLoading=false;$("#refreshAdminUsers").disabled=false;$("#loadMoreAdminUsers").disabled=false;renderAdminUsers()}
+}
+$("#adminUsersSearch").addEventListener("input",renderAdminUsers);
+$("#refreshAdminUsers").addEventListener("click",()=>loadAdminUsers(true));
+$("#loadMoreAdminUsers").addEventListener("click",()=>loadAdminUsers(false));
 function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;$("#articleForm").reset();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
 function read(id){const a=rows.find(x=>x.id===id);if(!a)return;const controls=user&&user.id===a.author_id?'<div class="read-actions"><button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button><button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button></div>':"";$("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()}
 $("#searchInput").addEventListener("input",e=>{query=e.target.value;draw()});
@@ -55,7 +85,7 @@ menuDropdown.addEventListener("click",async e=>{
  if(action==="settings")$("#settingsDialog").showModal();
  if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountUsername").value=user.user_metadata?.display_name||"";$("#accountNewEmail").value="";$("#accountNewPassword").value="";$("#mfaEnrollBox").hidden=true;await refreshMfa();$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
  if(action==="contribution")openWrite();
- if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal()}
+ if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal();if(!adminUsers.length)loadAdminUsers(true)}
 });
 const applyTheme=theme=>{
  const selected=["light","dark","oled"].includes(theme)?theme:"light";
