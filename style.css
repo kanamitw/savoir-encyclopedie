@@ -710,3 +710,17 @@ body[data-theme="christmas"] .terms-content,
 body[data-theme="christmas"] .terms-content h3{color:#fff1d5!important}
 body[data-theme="christmas"] .terms-dialog{background:#10271f!important;color:#fff1d5!important;border-color:#b18a49!important}
 body[data-theme="christmas"] .text-link{color:#e6bd62!important}
+
+
+/* Recommandations personnalisées */
+.recommendations{margin:0 0 34px;padding:22px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.recommendations-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:17px}
+.recommendations-heading h3{font:700 18px Manrope;letter-spacing:-.5px;margin:7px 0 4px}
+.recommendations-heading p{font-size:11px;color:var(--muted);margin:0;line-height:1.5}
+.recommendations-reset{border:1px solid var(--line);border-radius:7px;padding:8px 11px;background:transparent;color:var(--muted);font:600 10px "DM Sans";cursor:pointer;white-space:nowrap}
+.recommendations-reset:hover{border-color:var(--accent);color:var(--ink)}
+.recommendations .article-card{min-height:174px}
+body[data-theme="christmas"] .recommendations{background:#10271f!important;border-color:#b18a49!important;color:#fff1d5!important}
+body[data-theme="christmas"] .recommendations-heading p{color:#e7d9bd!important}
+body[data-theme="christmas"] .recommendations-reset{color:#fff1d5!important;border-color:#b18a49!important}
+@media(max-width:650px){.recommendations{padding:15px}.recommendations-heading{align-items:flex-start}.recommendations-heading h3{font-size:16px}}
