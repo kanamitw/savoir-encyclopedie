@@ -34,7 +34,7 @@ menuDropdown.addEventListener("click",e=>{
  if(!action)return;
  menuDropdown.hidden=true;menuToggle.setAttribute("aria-expanded","false");
  if(action==="settings")$("#settingsDialog").showModal();
- if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountUsername").value=user.user_metadata?.display_name||"";$("#accountNewEmail").value="";$("#accountNewPassword").value="";$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
+ if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountUsername").value=user.user_metadata?.display_name||"";$("#accountNewEmail").value="";$("#accountNewPassword").value="";$("#mfaEnrollBox").hidden=true;await refreshMfa();$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
  if(action==="contribution")openWrite();
 });
 const applyTheme=theme=>{
@@ -77,6 +77,45 @@ $("#savePassword").addEventListener("click",async()=>{
  $("#accountNewPassword").value="";
  notice("Mot de passe modifié.");
 });
+\n
+let pendingMfaFactor=null;
+async function refreshMfa(){
+ const {data,error}=await sb.auth.mfa.listFactors();
+ if(error){$("#mfaStatus").textContent="Impossible de charger les facteurs : "+error.message;return}
+ const verified=(data.totp||[]).filter(x=>x.status==="verified");
+ $("#mfaStatus").textContent=verified.length?"Double authentification activée.":"Double authentification désactivée.";
+ $("#enableMfa").hidden=verified.length>0;
+ $("#disableMfa").hidden=verified.length===0;
+}
+$("#enableMfa").addEventListener("click",async()=>{
+ const {data,error}=await sb.auth.mfa.enroll({factorType:"totp",friendlyName:"Savoir - Authenticator"});
+ if(error){notice("Erreur : "+error.message);return}
+ pendingMfaFactor=data;
+ $("#mfaQr").src=data.totp.qr_code;
+ $("#mfaSecret").textContent=data.totp.secret;
+ $("#mfaVerifyCode").value="";
+ $("#mfaEnrollBox").hidden=false;
+ $("#enableMfa").hidden=true;
+});
+$("#verifyMfa").addEventListener("click",async()=>{
+ if(!pendingMfaFactor)return;
+ const code=$("#mfaVerifyCode").value.trim();
+ if(!/^\\d{6}$/.test(code)){notice("Saisis le code à 6 chiffres.");return}
+ const challenge=await sb.auth.mfa.challenge({factorId:pendingMfaFactor.id});
+ if(challenge.error){notice("Erreur : "+challenge.error.message);return}
+ const result=await sb.auth.mfa.verify({factorId:pendingMfaFactor.id,challengeId:challenge.data.id,code});
+ if(result.error){notice("Code incorrect ou expiré : "+result.error.message);return}
+ pendingMfaFactor=null;$("#mfaEnrollBox").hidden=true;notice("Double authentification activée !");await refreshMfa();
+});
+$("#disableMfa").addEventListener("click",async()=>{
+ const {data,error}=await sb.auth.mfa.listFactors();
+ if(error){notice(error.message);return}
+ const factor=(data.totp||[]).find(x=>x.status==="verified");
+ if(!factor)return;
+ const result=await sb.auth.mfa.unenroll({factorId:factor.id});
+ if(result.error){notice("Impossible de désactiver : "+result.error.message);return}
+ notice("Double authentification désactivée.");await refreshMfa();
+});
 \n$("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
 $("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
 $("#loginForm").addEventListener("submit",async e=>{
@@ -85,7 +124,26 @@ $("#loginForm").addEventListener("submit",async e=>{
  else r=await sb.auth.signInWithPassword({email,password});
  if(r.error){notice(r.error.message);return}
  if(signup&&!r.data.session){$("#loginDialog").close();notice("Vérifie tes e-mails pour confirmer ton compte.");return}
- user=r.data.user;await syncUser();$("#loginDialog").close();notice("Connexion réussie.");
+ user=r.data.user;
+ if(!signup){
+  const factors=await sb.auth.mfa.listFactors();
+  const factor=(factors.data?.totp||[]).find(x=>x.status==="verified");
+  if(factor){
+   const challenge=await sb.auth.mfa.challenge({factorId:factor.id});
+   if(challenge.error){notice(challenge.error.message);return}
+   pendingMfaFactor={id:factor.id,challengeId:challenge.data.id};
+   $("#loginDialog").close();$("#loginMfaCode").value="";$("#loginMfaDialog").showModal();return;
+  }
+ }
+ await syncUser();$("#loginDialog").close();notice("Connexion réussie.");
+});
+$("#verifyLoginMfa").addEventListener("click",async()=>{
+ if(!pendingMfaFactor?.challengeId)return;
+ const code=$("#loginMfaCode").value.trim();
+ if(!/^\\d{6}$/.test(code)){notice("Saisis le code à 6 chiffres.");return}
+ const result=await sb.auth.mfa.verify({factorId:pendingMfaFactor.id,challengeId:pendingMfaFactor.challengeId,code});
+ if(result.error){notice("Code incorrect ou expiré.");return}
+ pendingMfaFactor=null;await syncUser();$("#loginMfaDialog").close();notice("Connexion sécurisée réussie.");
 });
 $("#articleForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!user){notice("Connecte-toi pour publier.");return}
