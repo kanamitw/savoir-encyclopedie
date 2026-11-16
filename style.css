@@ -155,3 +155,6 @@ body[data-theme="dark"] .account-section input,body[data-theme="oled"] .account-
 .mfa-secret{display:block;overflow-wrap:anywhere;background:var(--soft);color:var(--ink);padding:10px;border-radius:6px;font-size:11px}
 #loginMfaDialog{padding:26px}
 #loginMfaDialog .muted{margin-bottom:12px}
+
+.read-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
+.read-actions .btn{min-width:100px}
