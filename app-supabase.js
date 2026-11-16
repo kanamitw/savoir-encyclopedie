@@ -16,7 +16,9 @@ function draw(){
  $("#emptyState").hidden=list.length>0;
 }
 async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
-async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):""}
+function isAdmin(){return user?.app_metadata?.role==="admin"}
+function updateAdminMenu(){const item=$("#adminMenuItem");if(item)item.hidden=!isAdmin();const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
+async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu()}
 function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;$("#articleForm").reset();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
 function read(id){const a=rows.find(x=>x.id===id);if(!a)return;const controls=user&&user.id===a.author_id?'<div class="read-actions"><button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button><button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button></div>':"";$("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()}
 $("#searchInput").addEventListener("input",e=>{query=e.target.value;draw()});
@@ -53,6 +55,7 @@ menuDropdown.addEventListener("click",async e=>{
  if(action==="settings")$("#settingsDialog").showModal();
  if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountUsername").value=user.user_metadata?.display_name||"";$("#accountNewEmail").value="";$("#accountNewPassword").value="";$("#mfaEnrollBox").hidden=true;await refreshMfa();$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
  if(action==="contribution")openWrite();
+ if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal()}
 });
 const applyTheme=theme=>{
  const selected=["light","dark","oled"].includes(theme)?theme:"light";
@@ -216,5 +219,5 @@ $("#articleForm").addEventListener("submit",async e=>{
  const wasEditing=Boolean(currentEditingId);currentEditingId=null;$("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice(wasEditing?"Article modifié !":"Article publié pour tous les visiteurs !");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
-sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
+sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
 (async()=>{await syncUser();await load()})();
