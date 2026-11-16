@@ -5,6 +5,40 @@ let rows=[],user=null,category="Tous",query="",currentEditingId=null,adminUsers=
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
+const READING_KEY="savoir-reading-history-v1";
+function getReadingHistory(){try{const value=JSON.parse(localStorage.getItem(READING_KEY)||"[]");return Array.isArray(value)?value:[]}catch{return[]}}
+function saveArticleClick(article){
+ const history=getReadingHistory(),entry=history.find(x=>x.id===article.id);
+ if(entry){entry.count=Math.min(50,(entry.count||1)+1);entry.last=Date.now();entry.category=article.category;entry.title=article.title}
+ else history.push({id:article.id,category:article.category,title:article.title,count:1,last:Date.now()});
+ try{localStorage.setItem(READING_KEY,JSON.stringify(history.slice(-100)))}catch{}
+}
+function articleCard(x){return '<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><span class="article-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></div></article>'}
+function renderRecommendations(){
+ const panel=$("#recommendations"),grid=$("#recommendationGrid");if(!panel||!grid)return;
+ const history=getReadingHistory().filter(h=>rows.some(a=>a.id===h.id));
+ if(!history.length){panel.hidden=true;return}
+ const categoryWeights={},wordWeights={};
+ const stop=new Set(["avec","dans","pour","sans","sous","chez","plus","moins","leur","leurs","elle","elles","nous","vous","être","avoir","tout","tous","une","des","les","aux","sur","par","que","qui","comment","fonctionnement","histoire","article","découvrir"]);
+ const words=s=>(String(s||"").toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").match(/[a-z0-9]{4,}/g)||[]).filter(w=>!stop.has(w));
+ history.forEach(h=>{
+  const age=Math.max(0,(Date.now()-(h.last||Date.now()))/86400000),weight=(h.count||1)*Math.exp(-age/45);
+  categoryWeights[h.category]=(categoryWeights[h.category]||0)+weight;
+  const article=rows.find(a=>a.id===h.id);
+  words((h.title||"")+" "+(article?.excerpt||"")+" "+(article?.body||"").slice(0,500)).forEach(w=>wordWeights[w]=(wordWeights[w]||0)+weight);
+ });
+ const viewed=new Set(history.map(h=>h.id));
+ const ranked=rows.filter(a=>!viewed.has(a.id)).map(a=>{
+  let score=5*Math.log1p(categoryWeights[a.category]||0);
+  const unique=new Set(words(a.title+" "+a.excerpt+" "+a.body.slice(0,700)));
+  unique.forEach(w=>{if(wordWeights[w])score+=Math.min(2,wordWeights[w]*0.7)});
+  const age=Math.max(0,(Date.now()-new Date(a.created_at).getTime())/86400000);
+  score+=0.25*Math.exp(-age/180);
+  return {article:a,score};
+ }).sort((a,b)=>b.score-a.score||new Date(b.article.created_at)-new Date(a.article.created_at)).slice(0,3);
+ grid.innerHTML=ranked.map(x=>articleCard(x.article)).join("");
+ panel.hidden=ranked.length===0;
+}
 function draw(){
  const list=rows.filter(x=>(category==="Tous"||x.category===category)&&(x.title+" "+x.excerpt+" "+x.body+" "+x.category).toLowerCase().includes(query.toLowerCase()));
  const order=$("#sortSelect").value;
@@ -13,8 +47,9 @@ function draw(){
  else list.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));
  $("#articleCount").textContent=rows.length;
  $("#contributorCount").textContent=new Set(rows.map(x=>x.author_id).filter(Boolean)).size;
- $("#articleGrid").innerHTML=list.map(x=>'<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><span class="article-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></div></article>').join("");
+ $("#articleGrid").innerHTML=list.map(articleCard).join("");
  $("#emptyState").hidden=list.length>0;
+ renderRecommendations();
 }
 async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
 function isAdmin(){return user?.app_metadata?.role==="admin"}
@@ -126,7 +161,7 @@ document.addEventListener("click",async e=>{
    $("#readDialog").close();await load();notice("Article supprimé.");return;
   }
  }
- const card=e.target.closest(".article-card");if(card)read(card.dataset.id);
+ const card=e.target.closest(".article-card");if(card){const article=rows.find(x=>x.id===card.dataset.id);if(article){saveArticleClick(article);renderRecommendations();read(card.dataset.id)}}
  const close=e.target.closest("[data-close]");if(close)$("#"+close.dataset.close).close();
 });
 const menuToggle=$("#menuToggle"),menuDropdown=$("#menuDropdown");
@@ -315,5 +350,6 @@ $("#articleForm").addEventListener("submit",async e=>{
  const wasEditing=Boolean(currentEditingId);currentEditingId=null;$("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice(wasEditing?"Article modifié !":"Article publié pour tous les visiteurs !");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
+$("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
 sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
 (async()=>{await syncUser();await load()})();
