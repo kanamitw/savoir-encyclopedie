@@ -382,3 +382,37 @@ body[data-theme="christmas"] .close-btn{background:#fffdf8;color:#20372d;border-
 body[data-theme="christmas"] .menu-trigger,body[data-theme="christmas"] .theme-option{background:#fffdf8;color:#20372d;border-color:#d9dfd3}
 body[data-theme="christmas"] .theme-option[aria-pressed="true"]{border-color:#9a2938}
 body[data-theme="christmas"] .article-arrow{color:#9a2938}
+
+
+/* Noël version festive : forêt, tapisseries, guirlande et neige */
+body[data-theme="christmas"]{--bg:#10271f;--surface:#fffaf0;--ink:#20382d;--muted:#68786d;--line:#d9cba9;--soft:#f1e7d2;--accent:#a32335;color-scheme:light;background-color:#10271f;background-image:radial-gradient(ellipse at 12% 18%,rgba(190,35,54,.24),transparent 32%),radial-gradient(ellipse at 88% 34%,rgba(209,173,83,.2),transparent 30%),repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 2px,transparent 2px 34px)}
+body[data-theme="christmas"] .topbar{background:#10271ff2;border-bottom:1px solid #b18a49;box-shadow:0 3px 18px #0005}
+body[data-theme="christmas"] .brand,body[data-theme="christmas"] .topbar .auth-status{color:#fff8e9}
+body[data-theme="christmas"] .brand-dot,body[data-theme="christmas"] .hero h1 span{color:#e6bd62}
+body[data-theme="christmas"] .brand-mark{background:#a32335;color:#fff;border-color:#e6bd62}
+body[data-theme="christmas"] .hero{background:linear-gradient(145deg,rgba(9,48,34,.96),rgba(20,65,45,.92));border-bottom:1px solid #b18a49;position:relative;overflow:hidden}
+body[data-theme="christmas"] .hero:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.4;background:radial-gradient(circle at 10% 25%,#e8d18b 0 2px,transparent 3px),radial-gradient(circle at 80% 20%,#fff 0 2px,transparent 3px),radial-gradient(circle at 65% 75%,#e8d18b 0 2px,transparent 3px);background-size:95px 85px,130px 110px,160px 120px}
+body[data-theme="christmas"] .hero-copy{position:relative;z-index:1}
+body[data-theme="christmas"] .hero .eyebrow{color:#e6bd62}
+body[data-theme="christmas"] .hero h1,body[data-theme="christmas"] .hero p,body[data-theme="christmas"] .hero .stats{color:#fff8e9}
+body[data-theme="christmas"] .search-wrap,body[data-theme="christmas"] .article-card,body[data-theme="christmas"] .modal,body[data-theme="christmas"] .modal input,body[data-theme="christmas"] .modal select,body[data-theme="christmas"] .modal textarea,body[data-theme="christmas"] .sort-controls select,#sortSelect{background:#fffaf0;color:#20382d;border-color:#d8c69c}
+body[data-theme="christmas"] .article-card{box-shadow:0 5px 18px #071a1250;border-top:3px solid #a32335}
+body[data-theme="christmas"] .article-card:nth-child(3n+2){border-top-color:#c49a43}
+body[data-theme="christmas"] .article-card:nth-child(3n){border-top-color:#286447}
+body[data-theme="christmas"] .articles-section{background:rgba(8,35,26,.22)}
+body[data-theme="christmas"] .articles-section .eyebrow,body[data-theme="christmas"] .articles-section h2,body[data-theme="christmas"] .articles-section p{color:#fff8e9}
+body[data-theme="christmas"] .contribute{background:linear-gradient(120deg,#7e1e2d,#174a35);border:1px solid #d4b66c;color:#fff8e9}
+body[data-theme="christmas"] .contribute h2,body[data-theme="christmas"] .contribute p{color:#fff8e9}
+body[data-theme="christmas"] .tag{background:#e3eee1;color:#24563c}
+body[data-theme="christmas"] .btn-dark{background:#a32335;color:#fff;border:1px solid #d8b65d}
+body[data-theme="christmas"] .close-btn,body[data-theme="christmas"] .menu-trigger,body[data-theme="christmas"] .theme-option{background:#fffaf0;color:#20382d;border-color:#d8c69c}
+body[data-theme="christmas"] .theme-option[aria-pressed="true"]{border:2px solid #a32335}
+body[data-theme="christmas"] .article-arrow{color:#a32335}
+body[data-theme="christmas"] footer{background:#0a1c16;color:#f8edcf;border-top:1px solid #b18a49}
+body[data-theme="christmas"] footer .brand{color:#fff8e9}
+body[data-theme="christmas"]::after{content:"";position:fixed;z-index:60;pointer-events:none;top:0;left:0;right:0;height:35px;background:radial-gradient(circle,#fff2b0 0 3px,rgba(255,221,116,.45) 4px,transparent 8px) 0 13px/48px 24px repeat-x,radial-gradient(circle,#ff6b6b 0 3px,rgba(255,65,65,.35) 4px,transparent 8px) 24px 17px/72px 24px repeat-x,radial-gradient(circle,#8be0a5 0 3px,rgba(75,210,125,.35) 4px,transparent 8px) 48px 12px/96px 24px repeat-x,radial-gradient(ellipse at 50% 0%,transparent 0 58%,#d2b66f 60% 62%,transparent 64%) 0 0/100px 28px repeat-x;filter:drop-shadow(0 0 5px rgba(255,214,105,.65))}
+body[data-theme="christmas"]::before{content:"";position:fixed;z-index:55;pointer-events:none;inset:-100vh 0 0;opacity:.78;background-image:radial-gradient(3px 3px at 20px 30px,#fff 98%,transparent),radial-gradient(2px 2px at 90px 120px,#fff8df 98%,transparent),radial-gradient(3px 3px at 160px 70px,#fff 98%,transparent),radial-gradient(2px 2px at 230px 190px,#fff8df 98%,transparent),radial-gradient(2px 2px at 300px 40px,#fff 98%,transparent),radial-gradient(3px 3px at 370px 150px,#fff8df 98%,transparent);background-size:410px 240px;animation:christmas-snow 16s linear infinite}
+@keyframes christmas-snow{from{transform:translateY(-15vh)}to{transform:translateY(115vh)}}
+@media(prefers-reduced-motion:reduce){body[data-theme="christmas"]::before{animation:none}}
+.preview-christmas{background:linear-gradient(135deg,#103b2b 0 42%,#a32335 42% 70%,#e3c16b 70%);position:relative}
+.preview-christmas:after{content:"";display:block;width:100%;height:5px;margin-top:5px;background:repeating-radial-gradient(circle,#ffe58a 0 2px,transparent 3px 12px)}
