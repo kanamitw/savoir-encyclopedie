@@ -225,7 +225,7 @@ $("#loginForm").addEventListener("submit",async e=>{
    r=await sb.auth.signUp({email,password,options:{data:{display_name:name}}});
   }else r=await sb.auth.signInWithPassword({email,password});
   if(r.error){if(r.error.code==="user_banned")notice("Ton compte est en attente d’approbation par l’administrateur.");else notice("Connexion impossible : "+r.error.message);return}
-  if(signup){if(r.data.session)await sb.auth.signOut();$("#loginDialog").close();notice("Demande d’inscription envoyée. Confirme ton e-mail si demandé ; ton compte sera utilisable après approbation par l’administrateur.");return}
+  if(signup){if(r.data.session)await sb.auth.signOut({scope:"local"});$("#loginDialog").close();notice("Demande d’inscription envoyée. Confirme ton e-mail si demandé ; ton compte sera utilisable après approbation par l’administrateur.");return}
   user=r.data.user;
   if(!signup){
    const factors=await sb.auth.mfa.listFactors();
