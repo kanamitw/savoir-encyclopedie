@@ -150,3 +150,8 @@ body[data-theme="dark"] .modal::backdrop,body[data-theme="oled"] .modal::backdro
 .account-section .form-note{margin:8px 0 0}
 .account-section.security-section{padding-bottom:18px}
 body[data-theme="dark"] .account-section input,body[data-theme="oled"] .account-section input{background:var(--surface);color:var(--ink);border-color:var(--line)}
+
+.mfa-qr{display:block;width:190px;height:190px;object-fit:contain;margin:12px auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px}
+.mfa-secret{display:block;overflow-wrap:anywhere;background:var(--soft);color:var(--ink);padding:10px;border-radius:6px;font-size:11px}
+#loginMfaDialog{padding:26px}
+#loginMfaDialog .muted{margin-bottom:12px}
