@@ -1,7 +1,7 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const TERMS_VERSION="1.0";
 const $=s=>document.querySelector(s);
-let rows=[],user=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="";
+let rows=[],user=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,allArticlesView=false,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="";
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
@@ -17,7 +17,7 @@ function articleCard(x){return '<article class="article-card" data-id="'+esc(x.i
 function renderRecommendations(){
  const panel=$("#recommendations"),grid=$("#recommendationGrid");if(!panel||!grid)return;
  const history=getReadingHistory().filter(h=>rows.some(a=>a.id===h.id));
- if(!history.length){panel.hidden=true;return}
+ 
  const categoryWeights={},wordWeights={};
  const stop=new Set(["avec","dans","pour","sans","sous","chez","plus","moins","leur","leurs","elle","elles","nous","vous","être","avoir","tout","tous","une","des","les","aux","sur","par","que","qui","comment","fonctionnement","histoire","article","découvrir"]);
  const words=s=>(String(s||"").toLocaleLowerCase("fr").normalize("NFD").replace(/[\u0300-\u036f]/g,"").match(/[a-z0-9]{4,}/g)||[]).filter(w=>!stop.has(w));
@@ -28,7 +28,7 @@ function renderRecommendations(){
   words((h.title||"")+" "+(article?.excerpt||"")+" "+(article?.body||"").slice(0,500)).forEach(w=>wordWeights[w]=(wordWeights[w]||0)+weight);
  });
  const viewed=new Set(history.map(h=>h.id));
- const ranked=rows.filter(a=>!viewed.has(a.id)).map(a=>{
+ const ranked=(history.length?rows.filter(a=>!viewed.has(a.id)):rows.slice()).map(a=>{
   let score=5*Math.log1p(categoryWeights[a.category]||0);
   const unique=new Set(words(a.title+" "+a.excerpt+" "+a.body.slice(0,700)));
   unique.forEach(w=>{if(wordWeights[w])score+=Math.min(2,wordWeights[w]*0.7)});
@@ -36,9 +36,9 @@ function renderRecommendations(){
   score+=0.25*Math.exp(-age/180);
   return {article:a,score};
  }).sort((a,b)=>b.score-a.score||new Date(b.article.created_at)-new Date(a.article.created_at));
- grid.innerHTML=ranked.slice(0,recommendationsLimit).map(x=>articleCard(x.article)).join("");
- const more=$("#showMoreRecommendations");if(more)more.hidden=ranked.length<=recommendationsLimit;
- panel.hidden=ranked.length===0;
+ grid.innerHTML=ranked.slice(0,5).map(x=>articleCard(x.article)).join("");
+ const more=$("#showMoreRecommendations");if(more)more.hidden=allArticlesView||ranked.length<=5;
+ panel.hidden=allArticlesView||ranked.length===0;
 }
 function draw(){
  const list=rows.filter(x=>(category==="Tous"||x.category===category)&&(x.title+" "+x.excerpt+" "+x.body+" "+x.category).toLowerCase().includes(query.toLowerCase()));
@@ -49,7 +49,11 @@ function draw(){
  $("#articleCount").textContent=rows.length;
  $("#contributorCount").textContent=new Set(rows.map(x=>x.author_id).filter(Boolean)).size;
  $("#articleGrid").innerHTML=list.map(articleCard).join("");
- $("#emptyState").hidden=list.length>0;
+ $("#articleGrid").hidden=!allArticlesView;
+ $("#emptyState").hidden=!allArticlesView||list.length>0;
+ const heading=$("#articlesTitle");if(heading)heading.textContent=allArticlesView?"Tous les articles":"Articles recommandés";
+ const back=$("#backToRecommendations");if(back)back.hidden=!allArticlesView;
+ const controls=document.querySelector(".sort-controls");if(controls)controls.hidden=!allArticlesView;
  renderRecommendations();
 }
 async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
@@ -136,7 +140,7 @@ function read(id){
  const controls=canEdit||canDelete?'<div class="read-actions">'+(canEdit?'<button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button>':"")+(canDelete?'<button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button>':"")+'</div>':"";
  $("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()
 }
-$("#searchInput").addEventListener("input",e=>{query=e.target.value;draw()});
+$("#searchInput").addEventListener("input",e=>{query=e.target.value;if(query.trim())allArticlesView=true;draw()});
 $("#sortSelect").addEventListener("change",draw);
 $("#categorySelect").addEventListener("change",e=>{category=e.target.value;draw()});
 document.addEventListener("click",async e=>{
@@ -351,7 +355,8 @@ $("#articleForm").addEventListener("submit",async e=>{
  const wasEditing=Boolean(currentEditingId);currentEditingId=null;$("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice(wasEditing?"Article modifié !":"Article publié pour tous les visiteurs !");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
-$("#showMoreRecommendations").addEventListener("click",()=>{recommendationsLimit+=5;renderRecommendations()});
+$("#showMoreRecommendations").addEventListener("click",()=>{allArticlesView=true;draw();window.scrollTo({top:0,behavior:"smooth"})});
+$("#backToRecommendations").addEventListener("click",()=>{allArticlesView=false;query="";$("#searchInput").value="";category="Tous";$("#categorySelect").value="Tous";draw();window.scrollTo({top:0,behavior:"smooth"})});
 $("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
 sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
 (async()=>{await syncUser();await load()})();
