@@ -8,11 +8,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=32">
+  <link rel="stylesheet" href="style.css?v=33">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="#" aria-label="Savoir, accueil"><span class="brand-mark">S</span><span>Savoir<span class="brand-dot">.</span></span></a>
+    <div class="topbar-search-slot" id="topbarSearchSlot" hidden></div>
     <span id="authStatus" class="auth-status" role="status" aria-live="polite">Vous n’êtes pas connecté</span>
     <div class="menu-wrap">
       <button class="menu-trigger" id="menuToggle" aria-expanded="false" aria-controls="menuDropdown">☰ Menu</button>
@@ -87,6 +88,6 @@
   <div id="toast" class="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="app-supabase.js?v=19"></script>
+  <script src="app-supabase.js?v=20"></script>
 </body>
 </html>
