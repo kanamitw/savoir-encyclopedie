@@ -277,3 +277,20 @@ body[data-theme="dark"] .illustration-longitude,
 body[data-theme="dark"] .illustration-latitude,
 body[data-theme="oled"] .illustration-longitude,
 body[data-theme="oled"] .illustration-latitude{stroke:var(--ink)}
+
+
+/* Retour à une page d'accueil centrée, sans illustration */
+.hero{display:block;max-width:none;width:100%;min-height:510px;padding:92px 24px 64px;text-align:center}
+.hero-copy{max-width:760px;margin:0 auto;text-align:center}
+.hero .eyebrow{justify-content:center}
+.hero-copy>p{max-width:520px;margin:0 auto}
+.hero .search-wrap{margin:30px auto 0;max-width:540px}
+.hero .stats{justify-content:center;margin-top:29px;gap:38px}
+@media(max-width:760px){
+ .hero{padding:70px 20px 48px;min-height:0}
+ .hero-copy{margin:0 auto;text-align:center}
+ .hero .eyebrow{justify-content:center}
+ .hero-copy>p{margin:0 auto}
+ .hero .search-wrap{margin:24px auto 0}
+ .hero .stats{justify-content:center;gap:22px}
+}
