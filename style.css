@@ -594,3 +594,20 @@ body[data-theme="christmas"]::after{
     radial-gradient(ellipse 96px 38px at 96px -10px,transparent 68%,#18251c 69% 71%,#b79a5d 72% 73%,transparent 74%) 0 0/192px 48px repeat-x;
   background-repeat:repeat-x;
 }
+
+
+/* Guirlande : ampoules posées directement sur la courbe du câble */
+body[data-theme="christmas"]::after{
+  height:48px;
+  background:
+    radial-gradient(ellipse 5px 7px at 24px 24px,#fff9d8 0 25%,#ffe38a 40%,#d99a36 66%,#70451e 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 72px 32px,#ffe6df 0 24%,#ff7770 42%,#c52e3d 68%,#70202a 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 120px 32px,#eaffed 0 24%,#8ee5a8 42%,#29945b 68%,#174d37 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 5px 7px at 168px 24px,#fff9d8 0 25%,#ffe38a 40%,#d99a36 66%,#70451e 83%,transparent 89%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 4px 3px at 24px 17px,#f4d58a 0 55%,#8b642f 75%,transparent 82%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 4px 3px at 72px 25px,#f4d58a 0 55%,#8b642f 75%,transparent 82%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 4px 3px at 120px 25px,#f4d58a 0 55%,#8b642f 75%,transparent 82%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 4px 3px at 168px 17px,#f4d58a 0 55%,#8b642f 75%,transparent 82%) 0 0/192px 48px repeat-x,
+    radial-gradient(ellipse 96px 38px at 96px -10px,transparent 68%,#18251c 69% 71%,#b79a5d 72% 73%,transparent 74%) 0 0/192px 48px repeat-x;
+  background-repeat:repeat-x;
+}
