@@ -44,7 +44,7 @@ async function loadAdminUsers(reset=false){
   $("#adminUsersMessage").hidden=true;renderAdminUsers();
  }catch(error){
   console.error("Erreur de chargement des comptes :",error);
-  $("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent="Impossible de charger les comptes : "+(error.message||"erreur inconnue")+".";
+  adminUsersError="Impossible de charger les comptes : "+(error.message||"erreur inconnue")+".";$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=adminUsersError;
  }finally{adminUsersLoading=false;$("#refreshAdminUsers").disabled=false;$("#loadMoreAdminUsers").disabled=false;renderAdminUsers()}
 }
 $("#adminUsersSearch").addEventListener("input",renderAdminUsers);
