@@ -52,7 +52,6 @@ function draw(){
  $("#articleGrid").innerHTML=list.map(articleCard).join("");
  $("#articleGrid").hidden=!allArticlesView;
  $("#emptyState").hidden=!allArticlesView||list.length>0;
- const heading=$("#articlesTitle");if(heading)heading.textContent=allArticlesView?"Tous les articles":"Articles recommandés";
  const topbarSlot=$("#topbarSearchSlot"),searchWrap=document.querySelector(".search-wrap"),stats=document.querySelector(".hero .stats");
  document.body.classList.toggle("all-articles-view",allArticlesView);
  if(topbarSlot&&searchWrap){
