@@ -118,7 +118,7 @@ document.addEventListener("click",async e=>{
    if(!confirm("Supprimer définitivement cet article ?"))return;
    const result=await sb.from("articles").delete().eq("id",id).select("id").maybeSingle();
    if(result.error){notice("Suppression impossible : "+result.error.message);return}
-   if(!result.data){notice("Article introuvable ou tu n’en es pas l’auteur.");return}
+   if(!result.data){notice("Article introuvable ou action non autorisée.");return}
    $("#readDialog").close();await load();notice("Article supprimé.");return;
   }
  }
