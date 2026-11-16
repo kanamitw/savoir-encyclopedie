@@ -1,6 +1,6 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
 const $=s=>document.querySelector(s);
-let rows=[],user=null,category="Tous",query="";
+let rows=[],user=null,category="Tous",query="",currentEditingId=null;
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
@@ -17,12 +17,29 @@ function draw(){
 }
 async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
 async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):""}
-function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}$("#articleForm").reset();$("#articleDialog").showModal()}
-function read(id){const a=rows.find(x=>x.id===id);if(!a)return;$("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>';$("#readDialog").showModal()}
+function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;$("#articleForm").reset();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
+function read(id){const a=rows.find(x=>x.id===id);if(!a)return;const controls=user&&user.id===a.author_id?'<div class="read-actions"><button type="button" class="btn btn-light" data-article-action="edit" data-article-id="'+esc(a.id)+'">Modifier</button><button type="button" class="btn btn-light" data-article-action="delete" data-article-id="'+esc(a.id)+'">Supprimer</button></div>':"";$("#readContent").innerHTML='<span class="tag">'+esc(a.category)+'</span><h1 class="read-title">'+esc(a.title)+'</h1><div class="read-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</div><div class="read-body">'+esc(a.body)+'</div>'+controls;$("#readDialog").showModal()}
 $("#searchInput").addEventListener("input",e=>{query=e.target.value;draw()});
 $("#sortSelect").addEventListener("change",draw);
 $("#categorySelect").addEventListener("change",e=>{category=e.target.value;draw()});
-document.addEventListener("click",e=>{
+document.addEventListener("click",async e=>{
+ const action=e.target.closest("[data-article-action]");
+ if(action){
+  const id=action.dataset.articleId,kind=action.dataset.articleAction,a=rows.find(x=>x.id===id);
+  if(!a||!user||a.author_id!==user.id){notice("Tu peux uniquement gérer tes propres articles.");return}
+  if(kind==="edit"){
+   currentEditingId=id;$("#articleTitle").value=a.title;$("#articleCategory").value=a.category;$("#articleExcerpt").value=a.excerpt||"";$("#articleBody").value=a.body;
+   $("#articleDialog").querySelector("h2").textContent="Modifier un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Enregistrer les modifications";
+   $("#readDialog").close();$("#articleDialog").showModal();return;
+  }
+  if(kind==="delete"){
+   if(!confirm("Supprimer définitivement cet article ?"))return;
+   const result=await sb.from("articles").delete().eq("id",id).eq("author_id",user.id).select("id").maybeSingle();
+   if(result.error){notice("Suppression impossible : "+result.error.message);return}
+   if(!result.data){notice("Article introuvable ou tu n’en es pas l’auteur.");return}
+   $("#readDialog").close();await load();notice("Article supprimé.");return;
+  }
+ }
  const card=e.target.closest(".article-card");if(card)read(card.dataset.id);
  const close=e.target.closest("[data-close]");if(close)$("#"+close.dataset.close).close();
 });
@@ -186,9 +203,17 @@ $("#verifyLoginMfa").addEventListener("click",async()=>{
 $("#articleForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!user){notice("Connecte-toi pour publier.");return}
  const body=$("#articleBody").value.trim();if(body.length<30){notice("Ajoute au moins 30 caractères.");return}
- const payload={title:$("#articleTitle").value.trim(),category:$("#articleCategory").value,excerpt:$("#articleExcerpt").value.trim()||body.slice(0,135),body:body,author_id:user.id,author_name:user.user_metadata.display_name||user.email.split("@")[0]};
- const r=await sb.from("articles").insert(payload);if(r.error){notice("Erreur : "+r.error.message);return}
- $("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice("Article publié pour tous les visiteurs !");
+ const payload={title:$("#articleTitle").value.trim(),category:$("#articleCategory").value,excerpt:$("#articleExcerpt").value.trim()||body.slice(0,135),body:body};
+ let r;
+ if(currentEditingId){
+  r=await sb.from("articles").update(payload).eq("id",currentEditingId).eq("author_id",user.id).select("id").maybeSingle();
+  if(r.error){notice("Modification impossible : "+r.error.message);return}
+  if(!r.data){notice("Article introuvable ou tu n’en es pas l’auteur.");return}
+ }else{
+  r=await sb.from("articles").insert({...payload,author_id:user.id,author_name:user.user_metadata.display_name||user.email.split("@")[0]});
+  if(r.error){notice("Erreur : "+r.error.message);return}
+ }
+ const wasEditing=Boolean(currentEditingId);currentEditingId=null;$("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice(wasEditing?"Article modifié !":"Article publié pour tous les visiteurs !");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
 sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
