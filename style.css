@@ -158,3 +158,17 @@ body[data-theme="dark"] .account-section input,body[data-theme="oled"] .account-
 
 .read-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
 .read-actions .btn{min-width:100px}
+
+
+/* Contraste des boutons secondaires en thèmes sombre et OLED */
+body[data-theme="dark"] .btn-light,
+body[data-theme="oled"] .btn-light{
+  background:var(--soft);
+  color:var(--ink);
+  border-color:var(--line);
+}
+body[data-theme="dark"] .btn-light:hover,
+body[data-theme="oled"] .btn-light:hover{
+  background:var(--surface);
+  border-color:var(--accent);
+}
