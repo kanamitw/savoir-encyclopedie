@@ -119,7 +119,29 @@ $("#disableMfa").addEventListener("click",async()=>{
 });
 
 $("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
-$("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
+$("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#forgotPassword").hidden=yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
+$("#forgotPassword").addEventListener("click",async()=>{
+ const email=$("#email").value.trim();
+ if(!email){notice("Saisis d’abord l’adresse e-mail de ton compte.");$("#email").focus();return}
+ const button=$("#forgotPassword");button.disabled=true;button.textContent="Envoi…";
+ try{
+  const redirectTo=window.location.origin+window.location.pathname;
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
+  if(error)throw error;
+  $("#loginDialog").close();notice("Si un compte existe pour cette adresse, un e-mail de réinitialisation va être envoyé.");
+ }catch(error){notice("Impossible d’envoyer l’e-mail : "+(error?.message||"réessaie plus tard."));}
+ finally{button.disabled=false;button.textContent="Mot de passe oublié ?"}
+});
+$("#passwordRecoveryForm").addEventListener("submit",async e=>{
+ e.preventDefault();const password=$("#recoveryNewPassword").value;
+ if(password.length<8){notice("Le mot de passe doit contenir au moins 8 caractères.");return}
+ const button=$("#saveRecoveryPassword");button.disabled=true;button.textContent="Enregistrement…";
+ try{
+  const {error}=await sb.auth.updateUser({password});if(error)throw error;
+  $("#passwordRecoveryDialog").close();$("#recoveryNewPassword").value="";await syncUser();notice("Mot de passe modifié. Tu peux maintenant te connecter.");
+ }catch(error){notice("Impossible de modifier le mot de passe : "+(error?.message||"le lien est peut-être expiré."));}
+ finally{button.disabled=false;button.textContent="Enregistrer le mot de passe"}
+});
 $("#loginForm").addEventListener("submit",async e=>{
  e.preventDefault();
  const button=$("#authSubmit"), original=button.textContent;
@@ -169,5 +191,5 @@ $("#articleForm").addEventListener("submit",async e=>{
  $("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice("Article publié pour tous les visiteurs !");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
-sb.auth.onAuthStateChange((_e,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):""});
+sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
 (async()=>{await syncUser();await load()})();
