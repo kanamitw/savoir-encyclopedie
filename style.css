@@ -666,3 +666,27 @@ body[data-theme="christmas"]::after{
 @media(max-width:600px){
   body[data-theme="christmas"]::after{height:66px;background-size:100% 66px}
 }
+
+
+/* Correctif de lisibilité Noël : compteurs et contenu des cartes */
+body[data-theme="christmas"] .hero .stats .stat strong{
+  color:#fff8e9!important;
+}
+body[data-theme="christmas"] #articleGrid .article-card{
+  background:linear-gradient(145deg,#17382b,#10271f)!important;
+  color:#fff1d5!important;
+  border-color:#b18a49!important;
+}
+body[data-theme="christmas"] #articleGrid .article-card h3,
+body[data-theme="christmas"] #articleGrid .article-card p,
+body[data-theme="christmas"] #articleGrid .article-card .article-bottom,
+body[data-theme="christmas"] #articleGrid .article-card .article-date{
+  color:#fff1d5!important;
+}
+body[data-theme="christmas"] #articleGrid .article-card .tag{
+  background:#24523b!important;
+  color:#fff1d5!important;
+}
+body[data-theme="christmas"] #articleGrid .article-card .article-arrow{
+  color:#e6bd62!important;
+}
