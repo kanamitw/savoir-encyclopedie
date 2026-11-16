@@ -28,7 +28,8 @@ function renderRecommendations(){
   words((h.title||"")+" "+(article?.excerpt||"")+" "+(article?.body||"").slice(0,500)).forEach(w=>wordWeights[w]=(wordWeights[w]||0)+weight);
  });
  const viewed=new Set(history.map(h=>h.id));
- const ranked=(history.length?rows.filter(a=>!viewed.has(a.id)):rows.slice()).map(a=>{
+ const candidates=history.length?rows.filter(a=>!viewed.has(a.id)):rows.slice();
+ const ranked=(candidates.length?candidates:rows.slice()).map(a=>{
   let score=5*Math.log1p(categoryWeights[a.category]||0);
   const unique=new Set(words(a.title+" "+a.excerpt+" "+a.body.slice(0,700)));
   unique.forEach(w=>{if(wordWeights[w])score+=Math.min(2,wordWeights[w]*0.7)});
@@ -37,8 +38,8 @@ function renderRecommendations(){
   return {article:a,score};
  }).sort((a,b)=>b.score-a.score||new Date(b.article.created_at)-new Date(a.article.created_at));
  grid.innerHTML=ranked.slice(0,5).map(x=>articleCard(x.article)).join("");
- const more=$("#showMoreRecommendations");if(more)more.hidden=allArticlesView||ranked.length<=5;
- panel.hidden=allArticlesView||ranked.length===0;
+ const more=$("#showMoreRecommendations");if(more)more.hidden=allArticlesView||rows.length===0;
+ panel.hidden=allArticlesView;
 }
 function draw(){
  const list=rows.filter(x=>(category==="Tous"||x.category===category)&&(x.title+" "+x.excerpt+" "+x.body+" "+x.category).toLowerCase().includes(query.toLowerCase()));
