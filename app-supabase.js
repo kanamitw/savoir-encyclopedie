@@ -77,7 +77,8 @@ $("#savePassword").addEventListener("click",async()=>{
  $("#accountNewPassword").value="";
  notice("Mot de passe modifié.");
 });
-\n
+
+
 let pendingMfaFactor=null;
 async function refreshMfa(){
  const {data,error}=await sb.auth.mfa.listFactors();
@@ -116,7 +117,8 @@ $("#disableMfa").addEventListener("click",async()=>{
  if(result.error){notice("Impossible de désactiver : "+result.error.message);return}
  notice("Double authentification désactivée.");await refreshMfa();
 });
-\n$("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
+
+$("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
 $("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
 $("#loginForm").addEventListener("submit",async e=>{
  e.preventDefault();const email=$("#email").value,password=$("#password").value,signup=$("#authMode").value==="signup";let r;
