@@ -171,7 +171,7 @@ $("#loginForm").addEventListener("submit",async e=>{
    r=await sb.auth.signUp({email,password,options:{data:{display_name:name}}});
   }else r=await sb.auth.signInWithPassword({email,password});
   if(r.error){notice("Connexion impossible : "+r.error.message);return}
-  if(signup&&!r.data.session){$("#loginDialog").close();notice("Vérifie tes e-mails pour confirmer ton compte.");return}
+  if(signup&&!r.data.session){notice("Vérifie tes e-mails pour confirmer ton compte, puis connecte-toi.");return}
   user=r.data.user;
   if(!signup){
    const factors=await sb.auth.mfa.listFactors();
@@ -198,7 +198,7 @@ $("#verifyLoginMfa").addEventListener("click",async()=>{
  if(!/^\d{6}$/.test(code)){notice("Saisis le code à 6 chiffres.");return}
  const result=await sb.auth.mfa.verify({factorId:pendingMfaFactor.id,challengeId:pendingMfaFactor.challengeId,code});
  if(result.error){notice("Code incorrect ou expiré.");return}
- pendingMfaFactor=null;await syncUser();$("#loginMfaDialog").close();notice("Connexion sécurisée réussie.");
+ pendingMfaFactor=null;await syncUser();$("#loginMfaDialog").close();await load();notice("Connexion sécurisée réussie.");
 });
 $("#articleForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!user){notice("Connecte-toi pour publier.");return}
