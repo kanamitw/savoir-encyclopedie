@@ -121,23 +121,37 @@ $("#disableMfa").addEventListener("click",async()=>{
 $("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
 $("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
 $("#loginForm").addEventListener("submit",async e=>{
- e.preventDefault();const email=$("#email").value,password=$("#password").value,signup=$("#authMode").value==="signup";let r;
- if(signup){const name=$("#displayName").value.trim();if(!name){notice("Saisis un pseudo.");return}r=await sb.auth.signUp({email,password,options:{data:{display_name:name}}})}
- else r=await sb.auth.signInWithPassword({email,password});
- if(r.error){notice(r.error.message);return}
- if(signup&&!r.data.session){$("#loginDialog").close();notice("Vérifie tes e-mails pour confirmer ton compte.");return}
- user=r.data.user;
- if(!signup){
-  const factors=await sb.auth.mfa.listFactors();
-  const factor=(factors.data?.totp||[]).find(x=>x.status==="verified");
-  if(factor){
-   const challenge=await sb.auth.mfa.challenge({factorId:factor.id});
-   if(challenge.error){notice(challenge.error.message);return}
-   pendingMfaFactor={id:factor.id,challengeId:challenge.data.id};
-   $("#loginDialog").close();$("#loginMfaCode").value="";$("#loginMfaDialog").showModal();return;
+ e.preventDefault();
+ const button=$("#authSubmit"), original=button.textContent;
+ button.disabled=true;button.textContent="Connexion…";
+ try{
+  const email=$("#email").value.trim(),password=$("#password").value,signup=$("#authMode").value==="signup";let r;
+  if(signup){
+   const name=$("#displayName").value.trim();
+   if(!name){notice("Saisis un pseudo.");return}
+   r=await sb.auth.signUp({email,password,options:{data:{display_name:name}}});
+  }else r=await sb.auth.signInWithPassword({email,password});
+  if(r.error){notice("Connexion impossible : "+r.error.message);return}
+  if(signup&&!r.data.session){$("#loginDialog").close();notice("Vérifie tes e-mails pour confirmer ton compte.");return}
+  user=r.data.user;
+  if(!signup){
+   const factors=await sb.auth.mfa.listFactors();
+   if(factors.error)throw factors.error;
+   const factor=(factors.data?.totp||[]).find(x=>x.status==="verified");
+   if(factor){
+    const challenge=await sb.auth.mfa.challenge({factorId:factor.id});
+    if(challenge.error)throw challenge.error;
+    pendingMfaFactor={id:factor.id,challengeId:challenge.data.id};
+    $("#loginDialog").close();$("#loginMfaCode").value="";$("#loginMfaDialog").showModal();return;
+   }
   }
+  await syncUser();$("#loginDialog").close();notice("Connexion réussie.");
+ }catch(error){
+  console.error("Erreur de connexion Savoir :",error);
+  notice("Erreur de connexion : "+(error?.message||"réessaie dans quelques instants."));
+ }finally{
+  button.disabled=false;button.textContent=original;
  }
- await syncUser();$("#loginDialog").close();notice("Connexion réussie.");
 });
 $("#verifyLoginMfa").addEventListener("click",async()=>{
  if(!pendingMfaFactor?.challengeId)return;
