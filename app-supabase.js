@@ -12,7 +12,7 @@ function draw(){
  else list.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));
  $("#articleCount").textContent=rows.length;
  $("#contributorCount").textContent=new Set(rows.map(x=>x.author_id).filter(Boolean)).size;
- $("#articleGrid").innerHTML=list.map(x=>'<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><span class="article-arrow">↗︎</span></div></article>').join("");
+ $("#articleGrid").innerHTML=list.map(x=>'<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><span class="article-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></div></article>').join("");
  $("#emptyState").hidden=list.length>0;
 }
 async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
