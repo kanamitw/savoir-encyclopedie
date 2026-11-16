@@ -232,3 +232,36 @@ body[data-theme="oled"] .btn-light:hover{
   .hero .stats{justify-content:center}
   .hero-illustration{max-width:250px;justify-self:center}
 }
+
+
+/* Illustration monochrome, sobre et épurée */
+.hero-illustration{
+  max-width:420px;
+  filter:none;
+}
+.illustration-halo{fill:#f1f1ef}
+.illustration-orbit{stroke:#d5d5d1;stroke-width:1.2;stroke-dasharray:2 8}
+.illustration-page{fill:#fff;stroke:#c9c9c4;stroke-width:1.7}
+.illustration-line{stroke:#8b8b85;stroke-width:2.4;opacity:.55}
+.illustration-spine{stroke:#d0d0ca;stroke-width:2}
+.illustration-glass{fill:#ffffff;fill-opacity:.88;stroke:#242424;stroke-width:7}
+.illustration-handle{stroke:#242424;stroke-width:13}
+.illustration-glint{fill:#f4f4f2;stroke:#777;stroke-width:1.5}
+.illustration-star{fill:#777;opacity:.45}
+body[data-theme="dark"] .illustration-halo{fill:#202220}
+body[data-theme="dark"] .illustration-orbit,
+body[data-theme="oled"] .illustration-orbit{stroke:#444}
+body[data-theme="dark"] .illustration-page,
+body[data-theme="oled"] .illustration-page{fill:#151515;stroke:#555}
+body[data-theme="dark"] .illustration-line,
+body[data-theme="oled"] .illustration-line{stroke:#aaa}
+body[data-theme="dark"] .illustration-spine,
+body[data-theme="oled"] .illustration-spine{stroke:#555}
+body[data-theme="dark"] .illustration-glass,
+body[data-theme="oled"] .illustration-glass{fill:#111;stroke:#eee}
+body[data-theme="dark"] .illustration-handle,
+body[data-theme="oled"] .illustration-handle{stroke:#eee}
+body[data-theme="dark"] .illustration-glint,
+body[data-theme="oled"] .illustration-glint{fill:#252525;stroke:#aaa}
+body[data-theme="dark"] .illustration-star,
+body[data-theme="oled"] .illustration-star{fill:#aaa}
