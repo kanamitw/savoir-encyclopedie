@@ -37,7 +37,7 @@ function renderRecommendations(){
   score+=0.25*Math.exp(-age/180);
   return {article:a,score};
  }).sort((a,b)=>b.score-a.score||new Date(b.article.created_at)-new Date(a.article.created_at));
- grid.innerHTML=ranked.slice(0,5).map(x=>articleCard(x.article)).join("");
+ grid.innerHTML=ranked.slice(0,6).map(x=>articleCard(x.article)).join("");
  const more=$("#showMoreRecommendations");if(more)more.hidden=allArticlesView||rows.length===0;
  panel.hidden=allArticlesView;
 }
