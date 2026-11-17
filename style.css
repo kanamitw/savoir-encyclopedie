@@ -769,3 +769,77 @@ body.all-articles-view .section-heading h2{font-size:23px}
 .search-result-count{flex:0 0 auto;margin-left:12px;color:#858b7d;font:10px "DM Sans";white-space:nowrap}
 .topbar-search-slot .search-result-count{font-size:10px}
 @media(max-width:560px){.search-result-count{font-size:9px;margin-left:5px}}
+
+
+/* Thème Liquid Glass — verre dépoli, reflets et profondeur */
+body[data-theme="liquid"]{
+ --bg:#e8eef8;--surface:#ffffff72;--ink:#172238;--muted:#65738b;--line:#ffffffa8;--soft:#ffffff66;--accent:#557bc5;
+ background:
+  radial-gradient(ellipse at 12% 8%,#b7d5ff 0,transparent 38%),
+  radial-gradient(ellipse at 88% 22%,#e4c9ff 0,transparent 34%),
+  radial-gradient(ellipse at 52% 92%,#bdebe6 0,transparent 42%),
+  linear-gradient(135deg,#eaf2ff,#e9e8f8 52%,#e3f3f1);
+ background-attachment:fixed;
+ color-scheme:light;
+}
+body[data-theme="liquid"] .topbar{
+ background:#ffffff70!important;border-bottom:1px solid #ffffffb8;
+ backdrop-filter:blur(28px) saturate(175%);-webkit-backdrop-filter:blur(28px) saturate(175%);
+ box-shadow:0 8px 30px #536b9810;
+}
+body[data-theme="liquid"] .brand-mark,
+body[data-theme="liquid"] .about-mark{
+ background:linear-gradient(145deg,#ffffffd9,#ffffff65);border:1px solid #ffffffd9;
+ box-shadow:inset 0 1px #fff,0 5px 18px #7188b522;color:#5479bd;
+}
+body[data-theme="liquid"] .auth-status,
+body[data-theme="liquid"] .menu-trigger,
+body[data-theme="liquid"] .menu-dropdown,
+body[data-theme="liquid"] .search-wrap,
+body[data-theme="liquid"] .article-card,
+body[data-theme="liquid"] .recommendations,
+body[data-theme="liquid"] .contribute,
+body[data-theme="liquid"] .category-card,
+body[data-theme="liquid"] .modal,
+body[data-theme="liquid"] .sort-controls select,
+body[data-theme="liquid"] #sortSelect,
+body[data-theme="liquid"] .theme-option{
+ background:linear-gradient(145deg,#ffffffb8,#ffffff62)!important;
+ border:1px solid #ffffffd9!important;
+ box-shadow:inset 0 1px 0 #ffffffed,0 10px 32px #61769b1b,0 2px 7px #61769b0b;
+ backdrop-filter:blur(24px) saturate(165%);-webkit-backdrop-filter:blur(24px) saturate(165%);
+ color:var(--ink);
+}
+body[data-theme="liquid"] .hero{background:linear-gradient(145deg,#ffffff35,#ffffff08);border-color:#ffffff85}
+body[data-theme="liquid"] .article-card:hover,
+body[data-theme="liquid"] .category-card:hover{border-color:#8eafe9!important;box-shadow:inset 0 1px #fff,0 15px 38px #526f9d2b}
+body[data-theme="liquid"] .tag{background:#dce9ffb8;color:#365d9e;border-radius:999px}
+body[data-theme="liquid"] .btn-dark{background:linear-gradient(135deg,#638bd2,#456bb3);color:white;border:1px solid #ffffff75;box-shadow:inset 0 1px #ffffff55,0 5px 14px #456bb333}
+body[data-theme="liquid"] .btn-light,
+body[data-theme="liquid"] .btn-quiet,
+body[data-theme="liquid"] .recommendations-reset{
+ background:#ffffff70;color:#31415e;border:1px solid #ffffffc9;backdrop-filter:blur(16px)
+}
+body[data-theme="liquid"] .menu-dropdown button:hover{background:#ffffffa8}
+body[data-theme="liquid"] .modal input,
+body[data-theme="liquid"] .modal select,
+body[data-theme="liquid"] .modal textarea,
+body[data-theme="liquid"] .account-section input{
+ background:#ffffff9c;color:#172238;border:1px solid #ffffffd9;box-shadow:inset 0 1px 4px #536b9810
+}
+body[data-theme="liquid"] .modal::backdrop{background:#34476645;backdrop-filter:blur(12px)}
+body[data-theme="liquid"] .close-btn{background:#ffffffa6;color:#31415e;border-color:#ffffffd9}
+body[data-theme="liquid"] .contribute{background:linear-gradient(120deg,#ffffff9c,#ffffff50)!important}
+body[data-theme="liquid"] .recommendations{background:#ffffff62!important}
+body[data-theme="liquid"] .article-card p,
+body[data-theme="liquid"] .read-body{color:#56647b}
+body[data-theme="liquid"] .filter-chip{background:#ffffff55;border-color:#ffffffa8;color:#53627a}
+body[data-theme="liquid"] .filter-chip.selected{background:#547bc1;border-color:#547bc1;color:white}
+body[data-theme="liquid"] .theme-preview.preview-liquid{background:linear-gradient(135deg,#c8ddff,#ffffffa8 48%,#d9c9ff)}
+@media(prefers-reduced-motion:no-preference){
+ body[data-theme="liquid"] .article-card,
+ body[data-theme="liquid"] .category-card,
+ body[data-theme="liquid"] .btn{transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+ body[data-theme="liquid"] .article-card:hover{transform:translateY(-3px)}
+}
+@media(prefers-reduced-motion:reduce){body[data-theme="liquid"] *{scroll-behavior:auto!important;transition:none!important}}
