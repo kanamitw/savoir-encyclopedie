@@ -162,8 +162,10 @@ $("#searchInput").addEventListener("keydown",e=>{
  if(e.key!=="Enter")return;
  e.preventDefault();
  query=e.currentTarget.value.trim();
- if(query)allArticlesView=true;
+ allArticlesView=true;
  draw();
+ history.pushState({view:"articles",query},"","#articles");
+ $("#articles").scrollIntoView({behavior:"smooth",block:"start"});
 });
 $("#sortSelect").addEventListener("change",draw);
 $("#categorySelect").addEventListener("change",e=>{category=e.target.value;draw()});
@@ -196,7 +198,14 @@ document.addEventListener("click",async e=>{
 document.querySelector(".brand")?.addEventListener("click",e=>{
  e.preventDefault();
  if(allArticlesView){allArticlesView=false;query="";$("#searchInput").value="";draw();}
+ history.pushState({view:"home"},"",window.location.pathname+window.location.search);
  window.scrollTo({top:0,behavior:"smooth"});
+});
+window.addEventListener("popstate",()=>{
+ const showArticles=window.location.hash==="#articles";
+ allArticlesView=showArticles;
+ if(!showArticles){query="";$("#searchInput").value="";}
+ draw();
 });
 const menuToggle=$("#menuToggle"),menuDropdown=$("#menuDropdown");
 menuToggle.addEventListener("click",()=>{const open=menuDropdown.hidden;menuDropdown.hidden=!open;menuToggle.setAttribute("aria-expanded",String(open))});
