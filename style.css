@@ -759,7 +759,6 @@ body[data-theme="christmas"] .recommendations-reset{color:#fff1d5!important;bord
 
 
 /* Vue plein écran de l'encyclopédie */
-body.all-articles-view .hero{display:none!important}
 body.all-articles-view .articles-section{min-height:calc(100vh - 64px);width:100%;max-width:none;margin:0;padding:22px clamp(18px,4vw,64px) 56px}
 body.all-articles-view .all-articles-toolbar{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 18px}
 body.all-articles-view .all-articles-toolbar[hidden]{display:none!important}
