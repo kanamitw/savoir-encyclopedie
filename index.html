@@ -71,7 +71,7 @@
     <div class="modal-head"><div><div class="eyebrow">ESPACE PRIVILÉGIÉ</div><h2>Administration</h2></div><button type="button" class="close-btn" data-close="adminDialog">×</button></div>
     <p class="settings-description">Bienvenue dans l’espace administrateur de Savoir.</p>
     <div class="account-section"><h3>Compte administrateur</h3><p id="adminAccountEmail" class="account-email"></p></div>
-    <section class="admin-users-section">
+    <section class="admin-users-section admin-contributions-section">\n      <div class="admin-users-heading"><div><h3>Contributions à valider</h3><p id="adminContributionsCount" class="form-note">Chargement…</p></div><button type="button" class="btn btn-light" id="refreshAdminContributions">Actualiser</button></div>\n      <div id="adminContributionsMessage" class="admin-users-message" role="status">Chargement des contributions…</div>\n      <div id="adminContributionsList" class="admin-contributions-list"></div>\n    </section>\n    <section class="admin-users-section">
       <div class="admin-users-heading"><div><h3>Comptes inscrits</h3><p id="adminUsersCount" class="form-note">Liste des utilisateurs de Savoir.</p></div><button type="button" class="btn btn-light" id="refreshAdminUsers">Actualiser</button></div>
       <input type="search" id="adminUsersSearch" class="admin-users-search" placeholder="Rechercher un nom ou un e-mail…" autocomplete="off">
       <div id="adminUsersMessage" class="admin-users-message" role="status">Chargement des comptes…</div>
@@ -88,6 +88,6 @@
   <div id="toast" class="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="app-supabase.js?v=36"></script>
+  <script src="app-supabase.js?v=37"></script>
 </body>
 </html>
