@@ -205,11 +205,11 @@ menuDropdown.addEventListener("click",async e=>{
  if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal();if(!adminUsers.length)loadAdminUsers(true)}
 });
 const applyTheme=theme=>{
- const selected=theme==="liquid"?"apple":(["light","dark","oled","christmas","apple"].includes(theme)?theme:"light");
+ const selected=["light","dark","oled","christmas"].includes(theme)?theme:"light";
  if(selected==="light")delete document.body.dataset.theme;else document.body.dataset.theme=selected;
  localStorage.setItem("savoir-theme",selected);
  document.querySelectorAll("[data-theme-choice]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.themeChoice===selected)));
- document.querySelector('meta[name="theme-color"]')?.setAttribute("content",selected==="oled"?"#000000":selected==="dark"?"#171a17":selected==="christmas"?"#24563c":selected==="apple"?"#f5f5f7":"#fafaf8");
+ document.querySelector('meta[name="theme-color"]')?.setAttribute("content",selected==="oled"?"#000000":selected==="dark"?"#171a17":selected==="christmas"?"#24563c":"#fafaf8");
 };
 applyTheme(localStorage.getItem("savoir-theme")||"light");
 document.querySelectorAll("[data-theme-choice]").forEach(b=>b.addEventListener("click",()=>applyTheme(b.dataset.themeChoice)));
