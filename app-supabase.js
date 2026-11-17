@@ -68,7 +68,7 @@ function updateAuthStatus(){const status=$("#authStatus");if(status){status.text
 function updateAdminMenu(){updateAuthStatus();const item=$("#adminMenuItem");if(item){const visible=Boolean(user&&isAdmin());item.hidden=!visible;item.style.display=visible?"block":"none";item.setAttribute("aria-hidden",String(!visible));}const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
 function hasAcceptedTerms(u=user){return u?.user_metadata?.terms_version===TERMS_VERSION}
 async function requireTermsAcceptance(){if(!user||hasAcceptedTerms())return;const dialog=$("#termsGateDialog");if(!dialog.open)dialog.showModal()}
-async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();await requireTermsAcceptance()}
+async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance()}else{const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
 function renderAdminUsers(){
  if(adminUsersError){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=adminUsersError;$("#adminUsersTableWrap").hidden=true;$("#loadMoreAdminUsers").hidden=true;return}
  const term=$("#adminUsersSearch").value.trim().toLowerCase();
@@ -307,7 +307,7 @@ $("#forgotPassword").addEventListener("click",async()=>{
   const redirectTo=window.location.origin+window.location.pathname;
   const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo});
   if(error)throw error;
-  $("#loginDialog").close();notice("Si un compte existe pour cette adresse, un e-mail de réinitialisation va être envoyé.");
+  notice("Si un compte existe pour cette adresse, un e-mail de réinitialisation va être envoyé.");
  }catch(error){notice("Impossible d’envoyer l’e-mail : "+(error?.message||"réessaie plus tard."));}
  finally{button.disabled=false;button.textContent="Mot de passe oublié ?"}
 });
@@ -333,7 +333,7 @@ $("#loginForm").addEventListener("submit",async e=>{
    if(!$("#termsAccepted").checked){notice("Tu dois accepter les conditions d’utilisation pour créer un compte.");return}r=await sb.auth.signUp({email,password,options:{data:{display_name:name,terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()}}});
   }else r=await sb.auth.signInWithPassword({email,password});
   if(r.error){if(r.error.code==="user_banned")notice("Ton compte est en attente d’approbation par l’administrateur.");else notice("Connexion impossible : "+r.error.message);return}
-  if(signup){if(r.data.session)await sb.auth.signOut({scope:"local"});$("#loginDialog").close();notice("Demande d’inscription envoyée. Confirme ton e-mail si demandé ; ton compte sera utilisable après approbation par l’administrateur.");return}
+  if(signup){if(r.data.session)await sb.auth.signOut({scope:"local"});$("#password").value="";$("#authMode").value="login";$("#authMode").dispatchEvent(new Event("change"));notice("Demande d’inscription envoyée. Confirme ton e-mail si demandé ; ton compte sera utilisable après approbation par l’administrateur.");return}
   user=r.data.user;
   if(!signup){
    const factors=await sb.auth.mfa.listFactors();
@@ -381,5 +381,6 @@ $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#sea
 $("#showMoreRecommendations").addEventListener("click",()=>{allArticlesView=true;draw();window.scrollTo({top:0,behavior:"smooth"})});
 
 $("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
-sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
-(async()=>{await syncUser();await load()})();
+sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();const gate=$("#loginDialog");if(user){if(gate.open)gate.close();}else if(!gate.open)gate.showModal();if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
+$("#loginDialog").addEventListener("cancel",e=>e.preventDefault());
+(async()=>{await syncUser();if(user)await load()})();
