@@ -52,18 +52,16 @@ function draw(){
  $("#articleGrid").innerHTML=list.map(articleCard).join("");
  $("#articleGrid").hidden=!allArticlesView;
  $("#emptyState").hidden=!allArticlesView||list.length>0;
- const topbarSlot=$("#topbarSearchSlot"),searchWrap=document.querySelector(".search-wrap"),stats=document.querySelector(".hero .stats");
+ const toolbar=$("#allArticlesToolbar"),searchWrap=document.querySelector(".search-wrap");
  document.body.classList.toggle("all-articles-view",allArticlesView);
- if(topbarSlot&&searchWrap){
+ if(toolbar&&searchWrap){
   if(allArticlesView){
-   topbarSlot.append(searchWrap);
-   topbarSlot.hidden=false;
-   topbarSlot.style.display="flex";
+   toolbar.append(searchWrap);
+   toolbar.hidden=false;
   }else{
-   const heroCopy=document.querySelector(".hero-copy");
+   const heroCopy=document.querySelector(".hero-copy"),stats=document.querySelector(".hero .stats");
    if(heroCopy&&stats&&searchWrap.parentElement!==heroCopy)heroCopy.insertBefore(searchWrap,stats);
-   topbarSlot.hidden=true;
-   topbarSlot.style.display="none";
+   toolbar.hidden=true;
   }
  }
  const controls=document.querySelector(".sort-controls");if(controls)controls.hidden=!allArticlesView;
