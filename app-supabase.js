@@ -55,9 +55,16 @@ function draw(){
  const topbarSlot=$("#topbarSearchSlot"),searchWrap=document.querySelector(".search-wrap"),stats=document.querySelector(".hero .stats");
  document.body.classList.toggle("all-articles-view",allArticlesView);
  if(topbarSlot&&searchWrap){
-  topbarSlot.hidden=!allArticlesView;
-  if(allArticlesView){topbarSlot.append(searchWrap);}
-  else{document.querySelector(".hero-copy").insertBefore(searchWrap,stats);}
+  if(allArticlesView){
+   topbarSlot.append(searchWrap);
+   topbarSlot.hidden=false;
+   topbarSlot.style.display="flex";
+  }else{
+   const heroCopy=document.querySelector(".hero-copy");
+   if(heroCopy&&stats&&searchWrap.parentElement!==heroCopy)heroCopy.insertBefore(searchWrap,stats);
+   topbarSlot.hidden=true;
+   topbarSlot.style.display="none";
+  }
  }
  const controls=document.querySelector(".sort-controls");if(controls)controls.hidden=!allArticlesView;
  renderRecommendations();
