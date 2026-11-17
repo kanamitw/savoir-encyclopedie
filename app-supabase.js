@@ -38,8 +38,8 @@ function renderRecommendations(){
   return {article:a,score};
  }).sort((a,b)=>b.score-a.score||new Date(b.article.created_at)-new Date(a.article.created_at));
  grid.innerHTML=ranked.slice(0,6).map(x=>articleCard(x.article)).join("");
- const more=$("#showMoreRecommendations");if(more)more.hidden=rows.length===0;
- panel.hidden=false;
+ const more=$("#showMoreRecommendations");if(more)more.hidden=allArticlesView||rows.length<=6;
+ panel.hidden=allArticlesView;
 }
 function draw(){
  const list=rows.filter(x=>(category==="Tous"||x.category===category)&&(x.title+" "+x.excerpt+" "+x.body+" "+x.category).toLowerCase().includes(query.toLowerCase()));
@@ -388,7 +388,7 @@ $("#articleForm").addEventListener("submit",async e=>{
  const wasEditing=Boolean(currentEditingId);currentEditingId=null;$("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice(wasEditing?"Article modifié !":"Article publié pour tous les visiteurs !");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
-$("#showMoreRecommendations").addEventListener("click",()=>{allArticlesView=true;draw();window.scrollTo({top:0,behavior:"smooth"})});
+$("#showMoreRecommendations").addEventListener("click",()=>{query="";$("#searchInput").value="";allArticlesView=true;window.history.pushState({view:"articles"},"","#articles");draw();window.scrollTo({top:0,behavior:"smooth"})});
 
 $("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
 sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();const gate=$("#loginDialog");if(event==="PASSWORD_RECOVERY"){recoveryLinkPending=false;if(gate.open)gate.close();if(!$("#passwordRecoveryDialog").open)$("#passwordRecoveryDialog").showModal();return}if(user){if(gate.open)gate.close();}else if(!recoveryLinkPending&&!gate.open)gate.showModal()});
