@@ -52,18 +52,19 @@ function draw(){
  $("#articleGrid").innerHTML=list.map(articleCard).join("");
  $("#articleGrid").hidden=!allArticlesView;
  $("#emptyState").hidden=!allArticlesView||list.length>0;
- const toolbar=$("#allArticlesToolbar"),searchWrap=document.querySelector(".search-wrap");
+ const topbarSlot=$("#topbarSearchSlot"),toolbar=$("#allArticlesToolbar"),searchWrap=document.querySelector(".search-wrap");
  document.body.classList.toggle("all-articles-view",allArticlesView);
- if(toolbar&&searchWrap){
+ if(topbarSlot&&searchWrap){
   if(allArticlesView){
-   toolbar.append(searchWrap);
-   toolbar.hidden=false;
+   topbarSlot.append(searchWrap);
+   topbarSlot.hidden=false;
   }else{
    const heroCopy=document.querySelector(".hero-copy"),stats=document.querySelector(".hero .stats");
    if(heroCopy&&stats&&searchWrap.parentElement!==heroCopy)heroCopy.insertBefore(searchWrap,stats);
-   toolbar.hidden=true;
+   topbarSlot.hidden=true;
   }
  }
+ if(toolbar)toolbar.hidden=true;
  const controls=document.querySelector(".sort-controls");if(controls)controls.hidden=!allArticlesView;
  renderRecommendations();
 }
