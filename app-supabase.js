@@ -372,7 +372,7 @@ $("#articleForm").addEventListener("submit",async e=>{
   if(r.error){notice("Modification impossible : "+r.error.message);return}
   if(!r.data){notice("Article introuvable ou tu n’en es pas l’auteur.");return}
  }else{
-  r=await sb.from("articles").insert({...payload,author_id:user.id,author_name:user.user_metadata.display_name||user.email.split("@")[0]});
+  r=await sb.from("articles").insert({...payload,author_id:user.id,author_name:user.user_metadata.display_name||"Savoir"});
   if(r.error){notice("Erreur : "+r.error.message);return}
  }
  const wasEditing=Boolean(currentEditingId);currentEditingId=null;$("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice(wasEditing?"Article modifié !":"Article publié pour tous les visiteurs !");
