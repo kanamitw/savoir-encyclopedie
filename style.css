@@ -769,3 +769,22 @@ body.all-articles-view .section-heading h2{font-size:23px}
 @media(max-width:560px){.search-result-count{font-size:9px;margin-left:5px}}
 
 
+
+/* Modération des contributions dans le panneau administrateur */
+.admin-contributions-section{margin-bottom:26px}
+.admin-contributions-list{display:grid;gap:12px}
+.admin-submission-card{padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.admin-submission-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.admin-submission-date,.admin-submission-meta{font-size:10px;color:var(--muted)}
+.admin-submission-card h4{font:700 15px Manrope;margin:10px 0 5px;color:var(--ink)}
+.admin-submission-meta{margin:0 0 10px}
+.admin-submission-excerpt{font-size:12px;line-height:1.6;color:var(--ink)}
+.admin-submission-details{margin:12px 0;color:var(--ink);font-size:11px}
+.admin-submission-details summary{cursor:pointer;font-weight:700;color:var(--accent)}
+.admin-submission-body{margin-top:10px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:280px;overflow:auto;padding:12px;border-radius:7px;background:var(--soft);font-size:11px;line-height:1.65}
+.admin-submission-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+body[data-theme="christmas"] .admin-submission-card{background:#17382b!important;border-color:#b18a49!important;color:#fff1d5!important}
+body[data-theme="christmas"] .admin-submission-card h4,
+body[data-theme="christmas"] .admin-submission-excerpt,
+body[data-theme="christmas"] .admin-submission-details{color:#fff1d5!important}
+body[data-theme="christmas"] .admin-submission-body{background:#10271f!important;color:#fff1d5!important}
