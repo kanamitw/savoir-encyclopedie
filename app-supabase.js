@@ -68,7 +68,7 @@ function updateAuthStatus(){const status=$("#authStatus");if(status){status.text
 function updateAdminMenu(){updateAuthStatus();const item=$("#adminMenuItem");if(item){const visible=Boolean(user&&isAdmin());item.hidden=!visible;item.style.display=visible?"block":"none";item.setAttribute("aria-hidden",String(!visible));}const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
 function hasAcceptedTerms(u=user){return u?.user_metadata?.terms_version===TERMS_VERSION}
 async function requireTermsAcceptance(){if(!user||hasAcceptedTerms())return;const dialog=$("#termsGateDialog");if(!dialog.open)dialog.showModal()}
-async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance()}else{const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
+async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance();await load()}else{const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
 function renderAdminUsers(){
  if(adminUsersError){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=adminUsersError;$("#adminUsersTableWrap").hidden=true;$("#loadMoreAdminUsers").hidden=true;return}
  const term=$("#adminUsersSearch").value.trim().toLowerCase();
@@ -383,4 +383,4 @@ $("#showMoreRecommendations").addEventListener("click",()=>{allArticlesView=true
 $("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
 sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();const gate=$("#loginDialog");if(user){if(gate.open)gate.close();}else if(!gate.open)gate.showModal();if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
 $("#loginDialog").addEventListener("cancel",e=>e.preventDefault());
-(async()=>{await syncUser();if(user)await load()})();
+(async()=>{await syncUser()})();
