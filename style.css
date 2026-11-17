@@ -654,10 +654,10 @@ body[data-theme="christmas"]::after{
   left:0;
   right:0;
   height:94px;
-  transform:none!important;
-  animation:none!important;
+  transform-origin:top center;
+  animation:christmas-garland-sway 7s ease-in-out infinite,christmas-lights-twinkle 3.4s ease-in-out infinite;
   opacity:1!important;
-  filter:none!important;
+  filter:drop-shadow(0 0 6px rgba(255,214,105,.75));
   background-image:url("data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 100" preserveAspectRatio="none">
 <defs>
  <linearGradient id="wire" x2="0" y2="1"><stop stop-color="#bca36a"/><stop offset=".5" stop-color="#263b2b"/><stop offset="1" stop-color="#111d16"/></linearGradient>
