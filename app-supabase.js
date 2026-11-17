@@ -1,7 +1,7 @@
-const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY);
+const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{flowType:"pkce",detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
 const TERMS_VERSION="1.0";
 const $=s=>document.querySelector(s);
-let rows=[],user=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,allArticlesView=false,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="";
+let rows=[],user=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,allArticlesView=false,adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="",recoveryLinkPending=new URLSearchParams(window.location.search).has("code")||new URLSearchParams(window.location.hash.slice(1)).get("type")==="recovery";
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
@@ -68,7 +68,7 @@ function updateAuthStatus(){const status=$("#authStatus");if(status){status.text
 function updateAdminMenu(){updateAuthStatus();const item=$("#adminMenuItem");if(item){const visible=Boolean(user&&isAdmin());item.hidden=!visible;item.style.display=visible?"block":"none";item.setAttribute("aria-hidden",String(!visible));}const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
 function hasAcceptedTerms(u=user){return u?.user_metadata?.terms_version===TERMS_VERSION}
 async function requireTermsAcceptance(){if(!user||hasAcceptedTerms())return;const dialog=$("#termsGateDialog");if(!dialog.open)dialog.showModal()}
-async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance();await load()}else{const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
+async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance();await load()}else if(!recoveryLinkPending){const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
 function renderAdminUsers(){
  if(adminUsersError){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=adminUsersError;$("#adminUsersTableWrap").hidden=true;$("#loadMoreAdminUsers").hidden=true;return}
  const term=$("#adminUsersSearch").value.trim().toLowerCase();
@@ -317,7 +317,7 @@ $("#passwordRecoveryForm").addEventListener("submit",async e=>{
  const button=$("#saveRecoveryPassword");button.disabled=true;button.textContent="Enregistrement…";
  try{
   const {error}=await sb.auth.updateUser({password});if(error)throw error;
-  $("#passwordRecoveryDialog").close();$("#recoveryNewPassword").value="";await syncUser();notice("Mot de passe modifié. Tu peux maintenant te connecter.");
+  $("#passwordRecoveryDialog").close();$("#recoveryNewPassword").value="";recoveryLinkPending=false;await sb.auth.signOut();user=null;updateAdminMenu();const login=$("#loginDialog");if(!login.open)login.showModal();notice("Mot de passe modifié ! Tu peux maintenant te connecter avec ton nouveau mot de passe.");
  }catch(error){notice("Impossible de modifier le mot de passe : "+(error?.message||"le lien est peut-être expiré."));}
  finally{button.disabled=false;button.textContent="Enregistrer le mot de passe"}
 });
@@ -381,6 +381,6 @@ $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#sea
 $("#showMoreRecommendations").addEventListener("click",()=>{allArticlesView=true;draw();window.scrollTo({top:0,behavior:"smooth"})});
 
 $("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
-sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();const gate=$("#loginDialog");if(user){if(gate.open)gate.close();}else if(!gate.open)gate.showModal();if(event==="PASSWORD_RECOVERY")$("#passwordRecoveryDialog").showModal()});
+sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();const gate=$("#loginDialog");if(event==="PASSWORD_RECOVERY"){recoveryLinkPending=false;if(gate.open)gate.close();if(!$("#passwordRecoveryDialog").open)$("#passwordRecoveryDialog").showModal();return}if(user){if(gate.open)gate.close();}else if(!recoveryLinkPending&&!gate.open)gate.showModal()});
 $("#loginDialog").addEventListener("cancel",e=>e.preventDefault());
 (async()=>{await syncUser()})();
