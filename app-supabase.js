@@ -1,7 +1,7 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{flowType:"pkce",detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
 const TERMS_VERSION="1.0";
 const $=s=>document.querySelector(s);
-let rows=[],user=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,allArticlesView=window.location.hash==="#articles",adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="",recoveryLinkPending=new URLSearchParams(window.location.search).has("code")||new URLSearchParams(window.location.hash.slice(1)).get("type")==="recovery";
+let rows=[],user=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,allArticlesView=window.location.hash==="#articles",adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="",adminContributions=[],adminContributionsLoading=false,adminContributionsError="",recoveryLinkPending=new URLSearchParams(window.location.search).has("code")||new URLSearchParams(window.location.hash.slice(1)).get("type")==="recovery";
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
@@ -134,6 +134,73 @@ $("#adminUsersTable").addEventListener("click",async e=>{
   notice(messages[action]||"Modification enregistrée.");
  }catch(error){notice("Action impossible : "+(error.message||"erreur inconnue"));button.disabled=false}
 });
+async function loadAdminContributions(){
+ if(!isAdmin()||adminContributionsLoading)return;
+ adminContributionsLoading=true;
+ $("#adminContributionsMessage").hidden=false;$("#adminContributionsMessage").textContent="Chargement des contributions…";
+ $("#refreshAdminContributions").disabled=true;
+ try{
+  const result=await sb.from("article_submissions").select("*").eq("status","pending").order("created_at",{ascending:true});
+  if(result.error)throw result.error;
+  adminContributions=result.data||[];adminContributionsError="";
+  renderAdminContributions();
+ }catch(error){
+  console.error("Erreur de chargement des contributions :",error);
+  adminContributionsError="Impossible de charger les contributions : "+(error.message||"erreur inconnue")+".";
+  $("#adminContributionsMessage").hidden=false;$("#adminContributionsMessage").textContent=adminContributionsError;
+  $("#adminContributionsList").innerHTML="";
+ }finally{
+  adminContributionsLoading=false;$("#refreshAdminContributions").disabled=false;
+ }
+}
+function renderAdminContributions(){
+ const count=adminContributions.length;
+ $("#adminContributionsCount").textContent=count+" contribution"+(count>1?"s":"")+" en attente";
+ $("#adminContributionsMessage").hidden=count>0;
+ if(!count&&!adminContributionsError)$("#adminContributionsMessage").textContent="Aucune contribution à valider pour le moment.";
+ $("#adminContributionsList").innerHTML=adminContributions.map(s=>
+  '<article class="admin-submission-card">'+
+   '<div class="admin-submission-top"><span class="tag">'+(s.submission_type==="edit"?"Modification":"Nouvel article")+'</span><span class="admin-submission-date">'+date(s.created_at)+'</span></div>'+
+   '<h4>'+esc(s.title)+'</h4><p class="admin-submission-meta">'+esc(s.category)+' · Par '+esc(s.author_name)+'</p>'+
+   '<p class="admin-submission-excerpt">'+esc(s.excerpt)+'</p>'+
+   '<details class="admin-submission-details"><summary>Lire le contenu complet</summary><div class="admin-submission-body">'+esc(s.body)+'</div></details>'+
+   '<div class="admin-submission-actions"><button type="button" class="btn btn-dark" data-contribution-action="approve" data-submission-id="'+esc(s.id)+'">Approuver et publier</button><button type="button" class="btn btn-light" data-contribution-action="reject" data-submission-id="'+esc(s.id)+'">Refuser</button></div>'+
+  '</article>'
+ ).join("");
+}
+$("#refreshAdminContributions").addEventListener("click",()=>loadAdminContributions());
+$("#adminContributionsList").addEventListener("click",async e=>{
+ const button=e.target.closest("[data-contribution-action]");if(!button||!isAdmin())return;
+ const action=button.dataset.contributionAction,submission=adminContributions.find(x=>x.id===button.dataset.submissionId);
+ if(!submission)return;
+ if(!confirm(action==="approve"?"Approuver et publier cette contribution ?":"Refuser cette contribution ?"))return;
+ button.disabled=true;
+ try{
+  if(action==="approve"){
+   if(submission.submission_type==="edit"){
+    const update=await sb.from("articles").update({title:submission.title,category:submission.category,excerpt:submission.excerpt,body:submission.body}).eq("id",submission.article_id).select("id").maybeSingle();
+    if(update.error)throw update.error;
+    if(!update.data)throw new Error("L’article d’origine est introuvable ou inaccessible.");
+   }else{
+    const exists=await sb.from("articles").select("id").eq("id",submission.article_id).maybeSingle();
+    if(exists.error)throw exists.error;
+    if(!exists.data){
+     const publish=await sb.from("articles").insert({id:submission.article_id,title:submission.title,category:submission.category,excerpt:submission.excerpt,body:submission.body,author_id:submission.author_id,author_name:submission.author_name}).select("id").single();
+     if(publish.error)throw publish.error;
+    }
+   }
+  }
+  const reviewed=await sb.from("article_submissions").update({status:action==="approve"?"approved":"rejected",reviewed_at:new Date().toISOString(),reviewed_by:user.id}).eq("id",submission.id).eq("status","pending").select("id").maybeSingle();
+  if(reviewed.error)throw reviewed.error;
+  if(!reviewed.data)throw new Error("Cette contribution a déjà été traitée.");
+  await loadAdminContributions();
+  if(action==="approve")await load();
+  notice(action==="approve"?"Contribution approuvée et publiée !":"Contribution refusée.");
+ }catch(error){
+  notice("Action impossible : "+(error.message||"erreur inconnue"));
+  button.disabled=false;
+ }
+});
 function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;$("#articleForm").reset();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
 function read(id){
  const a=rows.find(x=>x.id===id);if(!a)return;
@@ -212,7 +279,7 @@ menuDropdown.addEventListener("click",async e=>{
  if(action==="settings")$("#settingsDialog").showModal();
  if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountUsername").value=user.user_metadata?.display_name||"";$("#accountNewEmail").value="";$("#accountNewPassword").value="";$("#mfaEnrollBox").hidden=true;await refreshMfa();$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
  if(action==="contribution")openWrite();
- if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal();if(!adminUsers.length)loadAdminUsers(true)}
+ if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal();if(!adminUsers.length)loadAdminUsers(true);loadAdminContributions()}
 });
 const applyTheme=theme=>{
  const selected=["light","dark","oled","christmas"].includes(theme)?theme:"light";
@@ -373,19 +440,15 @@ $("#verifyLoginMfa").addEventListener("click",async()=>{
  pendingMfaFactor=null;$("#loginMfaDialog").close();await syncUser();if(hasAcceptedTerms())notice("Connexion sécurisée réussie.");
 });
 $("#articleForm").addEventListener("submit",async e=>{
- e.preventDefault();if(!user){notice("Connecte-toi pour publier.");return}
+ e.preventDefault();if(!user){notice("Connecte-toi pour envoyer une contribution.");return}
  const body=$("#articleBody").value.trim();if(body.length<30){notice("Ajoute au moins 30 caractères.");return}
- const payload={title:$("#articleTitle").value.trim(),category:$("#articleCategory").value,excerpt:$("#articleExcerpt").value.trim()||body.slice(0,135),body:body};
- let r;
- if(currentEditingId){
-  r=await sb.from("articles").update(payload).eq("id",currentEditingId).select("id").maybeSingle();
-  if(r.error){notice("Modification impossible : "+r.error.message);return}
-  if(!r.data){notice("Article introuvable ou tu n’en es pas l’auteur.");return}
- }else{
-  r=await sb.from("articles").insert({...payload,author_id:user.id,author_name:user.user_metadata.display_name||"Savoir"});
-  if(r.error){notice("Erreur : "+r.error.message);return}
- }
- const wasEditing=Boolean(currentEditingId);currentEditingId=null;$("#articleDialog").close();category="Tous";query="";$("#searchInput").value="";$("#categorySelect").value="Tous";await load();notice(wasEditing?"Article modifié !":"Article publié pour tous les visiteurs !");
+ const payload={title:$("#articleTitle").value.trim(),category:$("#articleCategory").value,excerpt:$("#articleExcerpt").value.trim()||body.slice(0,135),body};
+ const wasEditing=Boolean(currentEditingId);
+ const submission={...payload,article_id:currentEditingId||crypto.randomUUID(),submission_type:wasEditing?"edit":"new",author_id:user.id,author_name:user.user_metadata?.display_name||"Savoir",status:"pending"};
+ const result=await sb.from("article_submissions").insert(submission);
+ if(result.error){notice("Envoi impossible : "+result.error.message);return}
+ currentEditingId=null;$("#articleDialog").close();
+ notice(wasEditing?"Modification envoyée à l’administration pour validation.":"Contribution envoyée à l’administration pour validation.");
 });
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
 $("#showMoreRecommendations").addEventListener("click",()=>{query="";$("#searchInput").value="";allArticlesView=true;window.history.pushState({view:"articles"},"","#articles");draw();window.scrollTo({top:0,behavior:"smooth"})});
