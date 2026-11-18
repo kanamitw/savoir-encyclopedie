@@ -1,43 +1,48 @@
 # Savoir — encyclopédie collaborative
 
-Ce dossier contient une première version visuelle et interactive du site.
+Savoir est une encyclopédie collaborative en français. Les membres peuvent consulter les articles et proposer leurs propres connaissances. Les contributions sont examinées par un administrateur avant leur publication.
 
-## Lancer la démo sur ton Mac
+## Fonctionnalités
 
-1. Décompresse `encyclopedie-collaborative.zip`.
-2. Ouvre le dossier.
-3. Double-clique sur `index.html` (ou ouvre-le dans Firefox).
+- Recherche d’articles, filtres par thème et tri.
+- Sélection d’articles recommandés selon l’historique de lecture.
+- Création de compte, connexion et récupération du mot de passe.
+- Profil membre et gestion du compte.
+- Propositions de nouveaux articles et de modifications.
+- Modération obligatoire : les contributions restent en attente jusqu’à leur approbation par un administrateur.
+- Espace d’administration réservé aux administrateurs : validation ou refus des contributions, gestion des comptes et des permissions.
+- Thèmes clair, sombre, OLED et Noël.
+- Interface responsive.
 
-La recherche, les catégories, la lecture des articles et le formulaire de publication fonctionnent en mode démonstration. Les articles créés sont sauvegardés dans le navigateur utilisé (`localStorage`). Ils ne sont donc PAS partagés entre plusieurs élèves.
+## Modération des contributions
 
-## Passer à un vrai site collaboratif
+1. Un membre connecté envoie un nouvel article ou une modification.
+2. La proposition est enregistrée avec le statut « en attente » ; elle n’est pas publiée immédiatement.
+3. Un administrateur ouvre **Menu → Administration → Contributions à valider**.
+4. Il peut consulter la proposition, puis choisir **Approuver et publier** ou **Refuser**.
+5. Une modification approuvée remplace le contenu publié ; une proposition refusée n’est pas publiée.
 
-Pour que tous les élèves voient les mêmes articles et puissent créer un compte, il faut connecter le site à Supabase.
+L’accès aux fonctions d’administration doit rester réservé aux comptes ayant le rôle administrateur.
 
-### 1. Créer le projet Supabase
+## Technologies
 
-- Crée un compte sur https://supabase.com/
-- Crée un projet (Free).
-- Dans **SQL Editor**, exécute le contenu du fichier `supabase.sql`.
-- Dans **Project Settings → API**, récupère l'URL du projet et la clé `anon` / publishable.
+- HTML, CSS et JavaScript côté interface.
+- Supabase pour l’authentification, la base de données et les fonctions serveur.
+- GitHub pour le versionnement du code et le déploiement du site.
 
-### 2. Connecter le frontend
+## Structure du projet
 
-Le fichier `supabase-config.example.js` donne le modèle de configuration. La prochaine étape de développement consiste à remplacer le stockage local de `app.js` par les appels Supabase et à activer l'inscription / connexion. Ne mets JAMAIS une clé `service_role` dans le navigateur.
+- `index.html` : structure de l’interface et des fenêtres.
+- `style.css` : styles, thèmes et mise en page responsive.
+- `app-supabase.js` : logique de l’application, authentification, articles et administration.
+- `supabase.sql` : scripts SQL de référence pour la base de données.
+- `supabase-config.js` : configuration locale du projet Supabase (fichier de configuration à ne pas publier avec des secrets).
 
-### 3. Publier gratuitement
+## Développement
 
-- Mets le dossier dans un dépôt GitHub.
-- Connecte ce dépôt à Vercel : https://vercel.com/
-- Déploie le projet. Pour cette version HTML/CSS/JS, les réglages de build peuvent rester vides et le dossier racine est le dossier du site.
-- Tu obtiendras une adresse publique en `vercel.app`.
+1. Clone le dépôt.
+2. Configure le projet Supabase et les paramètres nécessaires dans `supabase-config.js`.
+3. Ouvre le site avec un serveur HTTP local pour tester les fonctionnalités.
+4. Publie les modifications sur la branche principale pour déclencher le déploiement configuré dans le dépôt.
 
-**À savoir :** les offres gratuites ont des quotas et conditions. Vercel Hobby est prévu pour des projets personnels/non commerciaux. Supabase Free peut mettre en pause un projet inactif pendant une semaine. Consulte les pages officielles avant de publier pour vérifier les conditions en vigueur.
-
-## Fichiers
-
-- `index.html` : structure des pages et fenêtres.
-- `style.css` : design responsive.
-- `app.js` : recherche, filtres, lecture et création locale d'articles.
-- `supabase.sql` : structure de départ de la base distante.
-- `supabase-config.example.js` : exemple de configuration (à compléter).
+**Sécurité :** ne place jamais une clé Supabase `service_role`, un mot de passe ou un secret privé dans le code frontend ou dans un dépôt public. Seule une clé publique destinée au navigateur peut être utilisée côté client, avec les politiques RLS et les contrôles serveur correctement configurés.
