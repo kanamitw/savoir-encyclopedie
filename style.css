@@ -961,3 +961,39 @@ body.all-articles-view .topbar-search-slot .search-wrap{margin:0;width:100%;max-
  body.all-articles-view .topbar-search-slot .search-wrap{height:36px}
  body.all-articles-view .all-articles-toolbar{margin-bottom:14px}
 }
+
+
+/* Animation d'accueil à l'arrivée sur Savoir */
+@keyframes savoir-arrive-down{
+  from{opacity:0;transform:translateY(-14px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes savoir-arrive-up{
+  from{opacity:0;transform:translateY(22px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes savoir-arrive-soft{
+  from{opacity:0}
+  to{opacity:1}
+}
+body:not(.all-articles-view) .topbar{
+  animation:savoir-arrive-down .65s cubic-bezier(.2,.7,.25,1) both;
+}
+body:not(.all-articles-view) .hero .hero-copy > *{
+  animation:savoir-arrive-up .7s cubic-bezier(.2,.7,.25,1) both;
+}
+body:not(.all-articles-view) .hero .hero-copy > :nth-child(1){animation-delay:.08s}
+body:not(.all-articles-view) .hero .hero-copy > :nth-child(2){animation-delay:.16s}
+body:not(.all-articles-view) .hero .hero-copy > :nth-child(3){animation-delay:.24s}
+body:not(.all-articles-view) .hero .hero-copy > :nth-child(4){animation-delay:.32s}
+body:not(.all-articles-view) .hero .hero-copy > :nth-child(5){animation-delay:.4s}
+body:not(.all-articles-view) .articles-section{
+  animation:savoir-arrive-soft .85s ease .28s both;
+}
+@media(prefers-reduced-motion:reduce){
+  body:not(.all-articles-view) .topbar,
+  body:not(.all-articles-view) .hero .hero-copy > *,
+  body:not(.all-articles-view) .articles-section{
+    animation:none!important;
+  }
+}
