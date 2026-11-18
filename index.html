@@ -113,6 +113,7 @@
     <div class="account-section"><h3>Compte administrateur</h3><p id="adminAccountEmail" class="account-email"></p></div>
     <section class="admin-users-section admin-contributions-section">
       <div class="admin-users-heading"><div><h3>Demandes d’aide</h3><p id="adminHelpCount" class="form-note">Questions envoyées par les membres.</p></div><button type="button" class="btn btn-light" id="refreshAdminHelp">Actualiser</button></div>
+      <button type="button" class="btn btn-light" id="toggleClosedAdminTickets" aria-pressed="false">Masquer les tickets clôturés</button>
       <input type="search" id="adminHelpTicketSearch" class="admin-users-search" placeholder="Rechercher un numéro de ticket (ex. KAN-000123)…" autocomplete="off" aria-label="Rechercher un numéro de ticket">
       <p id="adminHelpSearchEmpty" class="admin-users-message" role="status" hidden>Aucun ticket ne correspond à ce numéro.</p>
       <div id="adminHelpMessage" class="admin-users-message" role="status">Chargement des demandes…</div>
@@ -135,6 +136,6 @@
   <div id="toast" class="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="app-supabase.js?v=46"></script>
+  <script src="app-supabase.js?v=47"></script>
 </body>
 </html>
