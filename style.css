@@ -788,3 +788,33 @@ body[data-theme="christmas"] .admin-submission-card h4,
 body[data-theme="christmas"] .admin-submission-excerpt,
 body[data-theme="christmas"] .admin-submission-details{color:#fff1d5!important}
 body[data-theme="christmas"] .admin-submission-body{background:#10271f!important;color:#fff1d5!important}
+
+
+/* Centre de notifications */
+.notification-wrap{position:relative;flex:0 0 auto;margin-left:auto}
+.notification-trigger{width:39px;height:39px;display:grid;place-items:center;position:relative;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);cursor:pointer;transition:background .18s,border-color .18s}
+.notification-trigger:hover{background:var(--soft);border-color:#cbd1c5}
+.notification-trigger svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.notification-badge{position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;padding:0 4px;display:grid;place-items:center;border:2px solid var(--bg);border-radius:99px;background:#b64b42;color:#fff;font:700 9px "DM Sans"}
+.notification-badge[hidden]{display:none}
+.notification-panel{position:absolute;top:49px;right:0;width:min(360px,calc(100vw - 28px));max-height:min(440px,75vh);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 42px #0002;z-index:20;color:var(--ink)}
+.notification-panel[hidden]{display:none}
+.notification-panel-head{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.notification-panel-head strong{font:700 13px Manrope}
+.notification-panel-head button{border:0;background:none;color:var(--accent);font:600 10px "DM Sans";cursor:pointer}
+.notification-list{padding:4px 14px}
+.notification-item{display:flex;gap:10px;padding:13px 2px;border-bottom:1px solid var(--line)}
+.notification-item:last-child{border-bottom:0}
+.notification-dot{width:7px;height:7px;flex:0 0 7px;margin-top:5px;border-radius:50%;background:transparent}
+.notification-item.is-unread .notification-dot{background:var(--accent)}
+.notification-item strong{display:block;font:700 11px Manrope;margin-bottom:4px}
+.notification-item p{font-size:10px;line-height:1.5;color:var(--muted);margin:0 0 5px}
+.notification-item time{font-size:9px;color:var(--muted)}
+.notification-item.is-read{opacity:.7}
+.notification-empty{padding:20px 8px;text-align:center;font-size:11px;color:var(--muted)}
+body[data-theme="christmas"] .notification-trigger{background:#10271f!important;color:#fff1d5!important;border-color:#b18a49!important}
+body[data-theme="christmas"] .notification-panel,body[data-theme="christmas"] .notification-panel-head{background:#10271f!important;color:#fff1d5!important;border-color:#b18a49!important}
+body[data-theme="christmas"] .notification-item{border-color:#345342!important}
+body[data-theme="christmas"] .notification-item p,body[data-theme="christmas"] .notification-item time{color:#e7d9bd!important}
+body[data-theme="christmas"] .notification-panel-head button{color:#e6bd62!important}
+@media(max-width:560px){.notification-trigger{width:35px;height:35px}.notification-panel{right:-44px}}
