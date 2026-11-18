@@ -316,6 +316,41 @@ body[data-theme="dark"] .admin-role.is-admin,body[data-theme="oled"] .admin-role
 @media(max-width:560px){.admin-users-heading{align-items:flex-start}.admin-users-heading .btn{font-size:10px;padding:8px}.admin-users-table{font-size:10px}.admin-users-table th,.admin-users-table td{padding:9px}}
 
 
+/* Pages du menu en plein écran, comme l'administration */
+#articleDialog.modal,
+#helpDialog.modal,
+#settingsDialog.modal,
+#accountDialog.modal{
+  position:fixed;
+  inset:0;
+  margin:0;
+  width:100vw;
+  max-width:none;
+  height:100vh;
+  height:100dvh;
+  max-height:none;
+  border:0;
+  border-radius:0;
+  padding:clamp(18px,3vw,40px);
+  overflow:auto;
+  box-sizing:border-box;
+}
+#articleDialog.modal form{
+  max-width:1000px;
+  margin:0 auto;
+}
+#helpDialog.modal,
+#settingsDialog.modal,
+#accountDialog.modal{
+  padding:clamp(18px,3vw,40px);
+}
+@media(max-width:700px){
+  #articleDialog.modal,
+  #helpDialog.modal,
+  #settingsDialog.modal,
+  #accountDialog.modal{padding:18px 14px}
+}
+
 /* Administration en plein écran */
 #adminDialog.modal{
   position:fixed;
