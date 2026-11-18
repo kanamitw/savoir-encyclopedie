@@ -453,7 +453,7 @@ async function openHelpThread(ticketId,card,adminView,button){
  const thread=document.createElement("div");thread.className="help-thread";thread.textContent="Chargement de la conversation…";card.append(thread);
  if(button)button.textContent="Masquer la conversation";
  try{
-  const ticketResult=await sb.from("help_requests").select("id,user_id,user_name,message,created_at").eq("id",ticketId).single();
+  const ticketResult=await sb.from("help_requests").select("id,user_id,user_name,message,created_at,status").eq("id",ticketId).single();
   if(ticketResult.error)throw ticketResult.error;
   const ticket=ticketResult.data;
   const result=await sb.from("help_request_messages").select("id,sender_id,message,created_at").eq("help_request_id",ticketId).order("created_at",{ascending:true});
@@ -464,7 +464,7 @@ async function openHelpThread(ticketId,card,adminView,button){
    const author=fromMember?(adminView?esc(ticket.user_name||"Membre"):"Toi"):"Administration";
    return '<article class="help-chat-message '+(fromMember?"from-member":"from-admin")+'"><div class="help-chat-meta"><strong>'+author+'</strong><time>'+new Date(m.created_at).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"})+'</time></div><p>'+esc(m.message)+'</p></article>';
   }).join("")+'</div>'+
-  '<form class="help-reply-form" data-help-reply-form data-ticket-id="'+esc(ticketId)+'"><label for="helpReply-'+esc(ticketId)+'">Répondre au ticket</label><textarea id="helpReply-'+esc(ticketId)+'" name="message" rows="3" maxlength="2000" minlength="1" required placeholder="Écris ton message…"></textarea><button type="submit" class="btn btn-dark">Envoyer la réponse</button></form>';
+  (adminView||ticket.status==="pending"?'<form class="help-reply-form" data-help-reply-form data-ticket-id="'+esc(ticketId)+'"><label for="helpReply-'+esc(ticketId)+'">Répondre au ticket</label><textarea id="helpReply-'+esc(ticketId)+'" name="message" rows="3" maxlength="2000" minlength="1" required placeholder="Écris ton message…"></textarea><button type="submit" class="btn btn-dark">Envoyer la réponse</button></form>':'<p class="help-thread-closed">Ce ticket est clôturé. Tu ne peux plus envoyer de message.</p>');
  }catch(error){thread.textContent="Impossible de charger la conversation : "+(error.message||"erreur inconnue");}
 }
 async function loadMyHelpRequests(){
@@ -519,7 +519,6 @@ async function handleHelpReply(e,adminView){
  try{
   const result=await sb.from("help_request_messages").insert({help_request_id:ticketId,sender_id:user.id,message});
   if(result.error)throw result.error;
-  if(!adminView){const reopen=await sb.from("help_requests").update({status:"pending",resolved_at:null}).eq("id",ticketId);if(reopen.error)notice("Réponse envoyée, mais le ticket n’a pas pu être réouvert.");}
   notice("Réponse envoyée.");const card=form.closest(".admin-submission-card"),threadButton=card.querySelector("[data-help-thread]");
   const old=card.querySelector(".help-thread");if(old)old.remove();
   await openHelpThread(ticketId,card,adminView,threadButton);
