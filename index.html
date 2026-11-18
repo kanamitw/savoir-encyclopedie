@@ -68,7 +68,20 @@
       <h3>Proposer un article</h3><p>Dans « Contribution », rédige ton article puis envoie-le. Il sera examiné par un administrateur avant sa publication.</p>
       <h3>Notifications</h3><p>La cloche t’informe de l’évolution de tes contributions et des demandes en attente pour les administrateurs.</p>
       <h3>Personnaliser le site</h3><p>Dans « Réglages », tu peux modifier le thème et les préférences disponibles.</p>
-    </div><button type="button" class="btn btn-dark full" data-close="helpDialog">Fermer</button>
+    </div>
+    <section class="account-section help-contact-section">
+      <h3>Demander de l’aide à l’administrateur</h3>
+      <p class="form-note">Décris ton problème ou pose ta question. Ta demande sera envoyée directement à l’administration.</p>
+      <form id="helpRequestForm">
+        <label for="helpRequestSubject">Sujet</label>
+        <select id="helpRequestSubject" required><option value="Question générale">Question générale</option><option value="Problème technique">Problème technique</option><option value="Compte et connexion">Compte et connexion</option><option value="Article ou contribution">Article ou contribution</option><option value="Autre">Autre</option></select>
+        <label for="helpRequestMessage">Ton message</label>
+        <textarea id="helpRequestMessage" rows="4" minlength="10" maxlength="2000" required placeholder="Explique ce dont tu as besoin…"></textarea>
+        <button type="submit" class="btn btn-dark full" id="sendHelpRequest">Envoyer la demande</button>
+      </form>
+      <p id="helpRequestStatus" class="form-note" role="status"></p>
+    </section>
+    <button type="button" class="btn btn-dark full" data-close="helpDialog">Fermer</button>
   </dialog>
   <dialog id="settingsDialog" class="modal settings-modal">
     <div class="modal-head"><div><div class="eyebrow">PERSONNALISATION</div><h2>Réglages</h2></div><button type="button" class="close-btn" data-close="settingsDialog">×</button></div>
@@ -92,6 +105,11 @@
     <div class="modal-head"><div><div class="eyebrow">ESPACE PRIVILÉGIÉ</div><h2>Administration</h2></div><button type="button" class="close-btn" data-close="adminDialog">×</button></div>
     <p class="settings-description">Bienvenue dans l’espace administrateur de Savoir.</p>
     <div class="account-section"><h3>Compte administrateur</h3><p id="adminAccountEmail" class="account-email"></p></div>
+    <section class="admin-users-section admin-contributions-section">
+      <div class="admin-users-heading"><div><h3>Demandes d’aide</h3><p id="adminHelpCount" class="form-note">Questions envoyées par les membres.</p></div><button type="button" class="btn btn-light" id="refreshAdminHelp">Actualiser</button></div>
+      <div id="adminHelpMessage" class="admin-users-message" role="status">Chargement des demandes…</div>
+      <div id="adminHelpList" class="admin-contributions-list"></div>
+    </section>
     <section class="admin-users-section admin-contributions-section">\n      <div class="admin-users-heading"><div><h3>Contributions à valider</h3><p id="adminContributionsCount" class="form-note">Chargement…</p></div><button type="button" class="btn btn-light" id="refreshAdminContributions">Actualiser</button></div>\n      <div id="adminContributionsMessage" class="admin-users-message" role="status">Chargement des contributions…</div>\n      <div id="adminContributionsList" class="admin-contributions-list"></div>\n    </section>\n    <section class="admin-users-section">
       <div class="admin-users-heading"><div><h3>Comptes inscrits</h3><p id="adminUsersCount" class="form-note">Liste des utilisateurs de Savoir.</p></div><button type="button" class="btn btn-light" id="refreshAdminUsers">Actualiser</button></div>
       <input type="search" id="adminUsersSearch" class="admin-users-search" placeholder="Rechercher un nom ou un e-mail…" autocomplete="off">
