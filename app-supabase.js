@@ -93,8 +93,7 @@ function markNotificationsRead(){
 }
 
 function isAdmin(){return user?.app_metadata?.role==="admin"}
-function updateAuthStatus(){const status=$("#authStatus");if(status){status.textContent=user?"Connecté":"Vous n’êtes pas connecté";status.classList.toggle("is-connected",Boolean(user));}}
-function updateAdminMenu(){updateAuthStatus();const item=$("#adminMenuItem");if(item){const visible=Boolean(user&&isAdmin());item.hidden=!visible;item.style.display=visible?"block":"none";item.setAttribute("aria-hidden",String(!visible));}const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
+function updateAdminMenu(){const item=$("#adminMenuItem");if(item){const visible=Boolean(user&&isAdmin());item.hidden=!visible;item.style.display=visible?"block":"none";item.setAttribute("aria-hidden",String(!visible));}const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
 function hasAcceptedTerms(u=user){return u?.user_metadata?.terms_version===TERMS_VERSION}
 async function requireTermsAcceptance(){if(!user||hasAcceptedTerms())return;const dialog=$("#termsGateDialog");if(!dialog.open)dialog.showModal()}
 async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance();await load();await loadNotifications()}else if(!recoveryLinkPending){const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
