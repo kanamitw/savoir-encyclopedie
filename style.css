@@ -997,3 +997,7 @@ body:not(.all-articles-view) .articles-section{
     animation:none!important;
   }
 }
+
+/* Logo monochrome Savoir */
+.brand-mark{display:block;width:30px;height:30px;object-fit:contain;border:0!important;border-radius:0!important;background:transparent!important;color:inherit}
+.footer-brand .brand-mark{width:26px;height:26px}
