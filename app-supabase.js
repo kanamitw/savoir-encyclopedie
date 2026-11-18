@@ -315,7 +315,7 @@ menuDropdown.addEventListener("click",async e=>{
  if(action==="help")$("#helpDialog").showModal();
  if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountUsername").value=user.user_metadata?.display_name||"";$("#accountNewEmail").value="";$("#accountNewPassword").value="";$("#mfaEnrollBox").hidden=true;await refreshMfa();$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
  if(action==="contribution")openWrite();
- if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal();if(!adminUsers.length)loadAdminUsers(true);loadAdminContributions()}
+ if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal();if(!adminUsers.length)loadAdminUsers(true);loadAdminContributions();loadAdminHelpRequests()}
 });
 const applyTheme=theme=>{
  const selected=["light","dark","oled","christmas"].includes(theme)?theme:"light";
@@ -398,6 +398,48 @@ $("#disableMfa").addEventListener("click",async()=>{
  notice("Double authentification désactivée.");await refreshMfa();
 });
 
+async function loadAdminHelpRequests(){
+ if(!isAdmin())return;
+ const message=$("#adminHelpMessage"),list=$("#adminHelpList"),button=$("#refreshAdminHelp");
+ message.hidden=false;message.textContent="Chargement des demandes…";button.disabled=true;
+ try{
+  const result=await sb.from("help_requests").select("*").order("created_at",{ascending:false}).limit(100);
+  if(result.error)throw result.error;
+  const requests=result.data||[],pending=requests.filter(x=>x.status==="pending").length;
+  $("#adminHelpCount").textContent=requests.length+" demande"+(requests.length>1?"s":"")+" · "+pending+" en attente";
+  message.hidden=requests.length>0;
+  if(!requests.length)message.textContent="Aucune demande d’aide pour le moment.";
+  list.innerHTML=requests.map(r=>'<article class="admin-submission-card">'+
+   '<div class="admin-submission-top"><span class="tag">'+(r.status==="pending"?"En attente":"Traitée")+'</span><span class="admin-submission-date">'+date(r.created_at)+'</span></div>'+
+   '<h4>'+esc(r.subject)+'</h4><p class="admin-submission-meta">'+esc(r.user_name)+' · '+esc(r.user_email||"E-mail non renseigné")+'</p>'+
+   '<p class="admin-submission-body">'+esc(r.message)+'</p>'+
+   (r.status==="pending"?'<div class="admin-submission-actions"><button type="button" class="btn btn-dark" data-help-resolve="'+esc(r.id)+'">Marquer comme traitée</button></div>':"")+
+   '</article>').join("");
+ }catch(error){message.hidden=false;message.textContent="Impossible de charger les demandes : "+(error.message||"erreur inconnue");list.innerHTML="";}
+ finally{button.disabled=false}
+}
+$("#refreshAdminHelp").addEventListener("click",loadAdminHelpRequests);
+$("#adminHelpList").addEventListener("click",async e=>{
+ const button=e.target.closest("[data-help-resolve]");if(!button||!isAdmin())return;
+ button.disabled=true;
+ const result=await sb.from("help_requests").update({status:"resolved",resolved_at:new Date().toISOString()}).eq("id",button.dataset.helpResolve);
+ if(result.error){notice("Impossible de mettre à jour la demande : "+result.error.message);button.disabled=false;return}
+ notice("Demande marquée comme traitée.");await loadAdminHelpRequests();
+});
+$("#helpRequestForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!user){notice("Connecte-toi pour contacter l’administrateur.");$("#helpDialog").close();$("#loginDialog").showModal();return}
+ const button=$("#sendHelpRequest"),message=$("#helpRequestMessage").value.trim();
+ if(message.length<10){notice("Ton message doit contenir au moins 10 caractères.");return}
+ button.disabled=true;button.textContent="Envoi…";
+ try{
+  const result=await sb.from("help_requests").insert({user_id:user.id,user_name:user.user_metadata?.display_name||"Membre",user_email:user.email||null,subject:$("#helpRequestSubject").value,message});
+  if(result.error)throw result.error;
+  $("#helpRequestForm").reset();$("#helpRequestStatus").textContent="Ta demande a bien été envoyée à l’administrateur.";
+  notice("Demande d’aide envoyée.");
+ }catch(error){notice("Envoi impossible : "+(error.message||"réessaie plus tard."));}
+ finally{button.disabled=false;button.textContent="Envoyer la demande";}
+});
 $("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
 $("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#termsAcceptanceWrap").hidden=!yes;$("#termsAccepted").required=yes;if(!yes)$("#termsAccepted").checked=false;$("#forgotPassword").hidden=yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
 $("#openTerms").addEventListener("click",()=>$("#termsDialog").showModal());
