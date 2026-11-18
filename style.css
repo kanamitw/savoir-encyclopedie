@@ -940,3 +940,24 @@ body[data-theme="christmas"] .notification-item[role="button"]:hover{background:
 
 /* Titre de bienvenue : une seule ligne, taille ajustee au pseudo */
 .hero .hero-copy h1#welcomeHeading{white-space:nowrap!important;width:100%;max-width:100%;letter-spacing:-1.5px}
+
+
+/* Vue plein écran de tous les articles */
+body.all-articles-view .hero,
+body.all-articles-view footer{display:none!important}
+body.all-articles-view main{min-height:calc(100vh - 76px)}
+body.all-articles-view .articles-section{min-height:calc(100vh - 76px);width:100%;max-width:none;margin:0;padding:24px clamp(18px,4vw,64px) 56px}
+body.all-articles-view .all-articles-toolbar{display:flex;align-items:center;justify-content:flex-end;width:100%;margin:0 0 20px}
+body.all-articles-view .all-articles-toolbar #backToRecommendations{white-space:nowrap}
+body.all-articles-view .section-heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px}
+body.all-articles-view .section-heading h2{font:700 25px Manrope;letter-spacing:-1px;margin:0}
+body.all-articles-view #articleGrid{width:100%}
+body.all-articles-view .topbar-search-slot .search-wrap{margin:0;width:100%;max-width:520px;height:40px}
+@media(max-width:760px){
+ body.all-articles-view .articles-section{padding:16px 15px 36px}
+ body.all-articles-view .section-heading{align-items:flex-start;flex-direction:column}
+ body.all-articles-view .section-heading h2{font-size:22px}
+ body.all-articles-view .topbar-search-slot{margin:0 10px;max-width:none}
+ body.all-articles-view .topbar-search-slot .search-wrap{height:36px}
+ body.all-articles-view .all-articles-toolbar{margin-bottom:14px}
+}
