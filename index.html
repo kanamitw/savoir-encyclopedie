@@ -8,13 +8,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=40">
+  <link rel="stylesheet" href="style.css?v=41">
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="#" aria-label="Savoir, accueil"><span class="brand-mark">S</span><span>Savoir<span class="brand-dot">.</span></span></a>
     <div class="topbar-search-slot" id="topbarSearchSlot" hidden></div>
     <span id="authStatus" class="auth-status" role="status" aria-live="polite">Vous n’êtes pas connecté</span>
+    <div class="notification-wrap">
+      <button type="button" class="notification-trigger" id="notificationToggle" aria-label="Notifications" aria-expanded="false" aria-controls="notificationPanel" title="Notifications">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+        <span class="notification-badge" id="notificationBadge" hidden>0</span>
+      </button>
+      <section class="notification-panel" id="notificationPanel" hidden aria-label="Notifications">
+        <div class="notification-panel-head"><strong>Notifications</strong><button type="button" id="markNotificationsRead">Tout marquer comme lu</button></div>
+        <div class="notification-list" id="notificationList"><p class="notification-empty">Connecte-toi pour voir tes notifications.</p></div>
+      </section>
+    </div>
     <div class="menu-wrap">
       <button class="menu-trigger" id="menuToggle" aria-expanded="false" aria-controls="menuDropdown">☰ Menu</button>
       <div class="menu-dropdown" id="menuDropdown" hidden>
@@ -88,6 +98,6 @@
   <div id="toast" class="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="app-supabase.js?v=38"></script>
+  <script src="app-supabase.js?v=39"></script>
 </body>
 </html>
