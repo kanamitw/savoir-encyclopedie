@@ -398,18 +398,38 @@ $("#disableMfa").addEventListener("click",async()=>{
  notice("Double authentification désactivée.");await refreshMfa();
 });
 
+async function openHelpThread(ticketId,card,adminView,button){
+ const current=card.querySelector(".help-thread");
+ if(current){current.remove();if(button)button.textContent="Voir la conversation";return}
+ const thread=document.createElement("div");thread.className="help-thread";thread.textContent="Chargement de la conversation…";card.append(thread);
+ if(button)button.textContent="Masquer la conversation";
+ try{
+  const ticketResult=await sb.from("help_requests").select("id,user_id,user_name,message,created_at").eq("id",ticketId).single();
+  if(ticketResult.error)throw ticketResult.error;
+  const ticket=ticketResult.data;
+  const result=await sb.from("help_request_messages").select("id,sender_id,message,created_at").eq("help_request_id",ticketId).order("created_at",{ascending:true});
+  if(result.error)throw result.error;
+  const messages=[{sender_id:ticket.user_id,message:ticket.message,created_at:ticket.created_at,initial:true},...(result.data||[])];
+  thread.innerHTML='<div class="help-thread-messages">'+messages.map(m=>{
+   const fromMember=m.sender_id===ticket.user_id;
+   const author=fromMember?(adminView?esc(ticket.user_name||"Membre"):"Toi"):"Administration";
+   return '<article class="help-chat-message '+(fromMember?"from-member":"from-admin")+'"><div class="help-chat-meta"><strong>'+author+'</strong><time>'+new Date(m.created_at).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"})+'</time></div><p>'+esc(m.message)+'</p></article>';
+  }).join("")+'</div>'+
+  '<form class="help-reply-form" data-help-reply-form data-ticket-id="'+esc(ticketId)+'"><label for="helpReply-'+esc(ticketId)+'">Répondre au ticket</label><textarea id="helpReply-'+esc(ticketId)+'" name="message" rows="3" maxlength="2000" minlength="1" required placeholder="Écris ton message…"></textarea><button type="submit" class="btn btn-dark">Envoyer la réponse</button></form>';
+ }catch(error){thread.textContent="Impossible de charger la conversation : "+(error.message||"erreur inconnue");}
+}
 async function loadMyHelpRequests(){
  const message=$("#myHelpRequestsMessage"),list=$("#myHelpRequestsList");
  if(!message||!list)return;
  if(!user){message.textContent="Connecte-toi pour retrouver tes tickets.";list.innerHTML="";return}
  message.hidden=false;message.textContent="Chargement de tes demandes…";
  try{
-  const result=await sb.from("help_requests").select("ticket_number,subject,status,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(50);
+  const result=await sb.from("help_requests").select("id,ticket_number,subject,status,created_at,message,user_id,user_name").eq("user_id",user.id).order("created_at",{ascending:false}).limit(50);
   if(result.error)throw result.error;
   const requests=result.data||[];
   message.hidden=requests.length>0;
   if(!requests.length)message.textContent="Tu n’as pas encore envoyé de demande d’aide.";
-  list.innerHTML=requests.map(r=>'<article class="admin-submission-card"><div class="admin-submission-top"><span class="tag">'+(r.status==="pending"?"En attente":"Traitée")+'</span><span class="admin-submission-date">'+date(r.created_at)+'</span></div><p class="admin-submission-meta"><strong>Ticket n° '+esc(r.ticket_number||"Non attribué")+'</strong></p><h4>'+esc(r.subject)+'</h4></article>').join("");
+  list.innerHTML=requests.map(r=>'<article class="admin-submission-card" data-ticket-card="'+esc(r.id)+'"><div class="admin-submission-top"><span class="tag">'+(r.status==="pending"?"En attente":"Traitée")+'</span><span class="admin-submission-date">'+date(r.created_at)+'</span></div><p class="admin-submission-meta"><strong>Ticket n° '+esc(r.ticket_number||"Non attribué")+'</strong></p><h4>'+esc(r.subject)+'</h4><div class="admin-submission-actions"><button type="button" class="btn btn-light" data-help-thread="'+esc(r.id)+'">Voir la conversation</button></div></article>').join("");
  }catch(error){
   message.hidden=false;message.textContent="Impossible de charger tes tickets : "+(error.message||"erreur inconnue");list.innerHTML="";
  }
@@ -425,16 +445,40 @@ async function loadAdminHelpRequests(){
   $("#adminHelpCount").textContent=requests.length+" demande"+(requests.length>1?"s":"")+" · "+pending+" en attente";
   message.hidden=requests.length>0;
   if(!requests.length)message.textContent="Aucune demande d’aide pour le moment.";
-  list.innerHTML=requests.map(r=>'<article class="admin-submission-card">'+
+  list.innerHTML=requests.map(r=>'<article class="admin-submission-card" data-ticket-card="'+esc(r.id)+'">'+
    '<div class="admin-submission-top"><span class="tag">'+(r.status==="pending"?"En attente":"Traitée")+'</span><span class="admin-submission-date">'+date(r.created_at)+'</span></div>'+
    '<p class="admin-submission-meta"><strong>Ticket n° '+esc(r.ticket_number||"Non attribué")+'</strong></p>'+
    '<h4>'+esc(r.subject)+'</h4><p class="admin-submission-meta">'+esc(r.user_name)+' · '+esc(r.user_email||"E-mail non renseigné")+'</p>'+
    '<p class="admin-submission-body">'+esc(r.message)+'</p>'+
-   (r.status==="pending"?'<div class="admin-submission-actions"><button type="button" class="btn btn-dark" data-help-resolve="'+esc(r.id)+'">Marquer comme traitée</button></div>':"")+
-   '</article>').join("");
+   '<div class="admin-submission-actions"><button type="button" class="btn btn-light" data-help-thread="'+esc(r.id)+'">Voir la conversation</button>'+
+   (r.status==="pending"?'<button type="button" class="btn btn-dark" data-help-resolve="'+esc(r.id)+'">Marquer comme traitée</button>':"")+
+   '</div></article>').join("");
  }catch(error){message.hidden=false;message.textContent="Impossible de charger les demandes : "+(error.message||"erreur inconnue");list.innerHTML="";}
  finally{button.disabled=false}
 }
+async function handleHelpThreadAction(e,adminView){
+ const button=e.target.closest("[data-help-thread]");if(!button)return;
+ await openHelpThread(button.dataset.helpThread,button.closest(".admin-submission-card"),adminView,button);
+}
+async function handleHelpReply(e,adminView){
+ const form=e.target.closest("[data-help-reply-form]");if(!form)return;
+ e.preventDefault();
+ if(!user){notice("Connecte-toi pour répondre.");return}
+ const field=form.elements.message,message=field.value.trim(),ticketId=form.dataset.ticketId;
+ if(!message){notice("Écris un message avant de l’envoyer.");return}
+ const button=form.querySelector('button[type="submit"]');button.disabled=true;button.textContent="Envoi…";
+ try{
+  const result=await sb.from("help_request_messages").insert({help_request_id:ticketId,sender_id:user.id,message});
+  if(result.error)throw result.error;
+  notice("Réponse envoyée.");const card=form.closest(".admin-submission-card"),threadButton=card.querySelector("[data-help-thread]");
+  const old=card.querySelector(".help-thread");if(old)old.remove();
+  await openHelpThread(ticketId,card,adminView,threadButton);
+ }catch(error){notice("Impossible d’envoyer la réponse : "+(error.message||"réessaie."));button.disabled=false;button.textContent="Envoyer la réponse";}
+}
+$("#myHelpRequestsList").addEventListener("click",e=>handleHelpThreadAction(e,false));
+$("#myHelpRequestsList").addEventListener("submit",e=>handleHelpReply(e,false));
+$("#adminHelpList").addEventListener("click",e=>handleHelpThreadAction(e,true));
+$("#adminHelpList").addEventListener("submit",e=>handleHelpReply(e,true));
 $("#refreshAdminHelp").addEventListener("click",loadAdminHelpRequests);
 $("#adminHelpList").addEventListener("click",async e=>{
  const button=e.target.closest("[data-help-resolve]");if(!button||!isAdmin())return;
