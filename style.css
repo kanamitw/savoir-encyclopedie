@@ -856,3 +856,18 @@ body[data-theme="christmas"] .notification-panel-head button{color:#e6bd62!impor
   .menu-trigger,.notification-trigger{transition:none}
   .menu-dropdown:not([hidden]),.notification-panel:not([hidden]){animation:none}
 }
+
+/* Survol strictement identique pour Menu et Notifications */
+.menu-trigger:hover,
+.notification-trigger:hover{
+  background:var(--soft)!important;
+  border-color:#cbd1c5!important;
+  color:var(--ink);
+  transform:translateY(-1px);
+  box-shadow:0 3px 10px #00000012;
+}
+.menu-trigger:active,
+.notification-trigger:active{
+  transform:scale(.96);
+  box-shadow:none;
+}
