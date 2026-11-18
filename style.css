@@ -822,3 +822,37 @@ body[data-theme="christmas"] .notification-panel-head button{color:#e6bd62!impor
 /* Bouton notifications : même hauteur que Menu, en conservant sa forme carrée */
 .notification-trigger{width:38px;height:38px;min-width:38px;padding:0;border-radius:8px}
 @media(max-width:560px){.notification-trigger{width:36px;height:36px;min-width:36px;padding:0}}
+
+/* Animations harmonisées : Menu et notifications */
+.menu-trigger,
+.notification-trigger{
+  transition:background .2s ease,border-color .2s ease,color .2s ease,transform .2s ease,box-shadow .2s ease;
+}
+.menu-trigger:hover,
+.notification-trigger:hover{
+  transform:translateY(-1px);
+  box-shadow:0 3px 10px #00000012;
+}
+.menu-trigger:active,
+.notification-trigger:active{
+  transform:translateY(0) scale(.96);
+  box-shadow:none;
+}
+.menu-trigger:focus-visible,
+.notification-trigger:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+.menu-dropdown:not([hidden]),
+.notification-panel:not([hidden]){
+  transform-origin:top right;
+  animation:kanami-pop-in .2s cubic-bezier(.2,.75,.25,1) both;
+}
+@keyframes kanami-pop-in{
+  from{opacity:0;transform:translateY(-7px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@media(prefers-reduced-motion:reduce){
+  .menu-trigger,.notification-trigger{transition:none}
+  .menu-dropdown:not([hidden]),.notification-panel:not([hidden]){animation:none}
+}
