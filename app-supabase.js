@@ -470,6 +470,7 @@ async function handleHelpReply(e,adminView){
  try{
   const result=await sb.from("help_request_messages").insert({help_request_id:ticketId,sender_id:user.id,message});
   if(result.error)throw result.error;
+  if(!adminView){const reopen=await sb.from("help_requests").update({status:"pending",resolved_at:null}).eq("id",ticketId);if(reopen.error)notice("Réponse envoyée, mais le ticket n’a pas pu être réouvert.");}
   notice("Réponse envoyée.");const card=form.closest(".admin-submission-card"),threadButton=card.querySelector("[data-help-thread]");
   const old=card.querySelector(".help-thread");if(old)old.remove();
   await openHelpThread(ticketId,card,adminView,threadButton);
