@@ -312,6 +312,7 @@ menuDropdown.addEventListener("click",async e=>{
  if(!action)return;
  menuDropdown.hidden=true;menuToggle.setAttribute("aria-expanded","false");
  if(action==="settings")$("#settingsDialog").showModal();
+ if(action==="help")$("#helpDialog").showModal();
  if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountUsername").value=user.user_metadata?.display_name||"";$("#accountNewEmail").value="";$("#accountNewPassword").value="";$("#mfaEnrollBox").hidden=true;await refreshMfa();$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
  if(action==="contribution")openWrite();
  if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal();if(!adminUsers.length)loadAdminUsers(true);loadAdminContributions()}
