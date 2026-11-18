@@ -173,6 +173,7 @@ $("#adminContributionsList").addEventListener("click",async e=>{
  const button=e.target.closest("[data-contribution-action]");if(!button||!isAdmin())return;
  const action=button.dataset.contributionAction,submission=adminContributions.find(x=>x.id===button.dataset.submissionId);
  if(!submission)return;
+ let publishedArticleId=submission.article_id;
  if(!confirm(action==="approve"?"Approuver et publier cette contribution ?":"Refuser cette contribution ?"))return;
  button.disabled=true;
  try{
@@ -182,15 +183,18 @@ $("#adminContributionsList").addEventListener("click",async e=>{
     if(update.error)throw update.error;
     if(!update.data)throw new Error("L’article d’origine est introuvable ou inaccessible.");
    }else{
-    const exists=await sb.from("articles").select("id").eq("id",submission.article_id).maybeSingle();
+    publishedArticleId=publishedArticleId||crypto.randomUUID();
+    const exists=await sb.from("articles").select("id").eq("id",publishedArticleId).maybeSingle();
     if(exists.error)throw exists.error;
     if(!exists.data){
-     const publish=await sb.from("articles").insert({id:submission.article_id,title:submission.title,category:submission.category,excerpt:submission.excerpt,body:submission.body,author_id:submission.author_id,author_name:submission.author_name}).select("id").single();
+     const publish=await sb.from("articles").insert({id:publishedArticleId,title:submission.title,category:submission.category,excerpt:submission.excerpt,body:submission.body,author_id:submission.author_id,author_name:submission.author_name}).select("id").single();
      if(publish.error)throw publish.error;
     }
    }
   }
-  const reviewed=await sb.from("article_submissions").update({status:action==="approve"?"approved":"rejected",reviewed_at:new Date().toISOString(),reviewed_by:user.id}).eq("id",submission.id).eq("status","pending").select("id").maybeSingle();
+  const reviewUpdate={status:action==="approve"?"approved":"rejected",reviewed_at:new Date().toISOString(),reviewed_by:user.id};
+  if(action==="approve"&&submission.submission_type==="new")reviewUpdate.article_id=publishedArticleId;
+  const reviewed=await sb.from("article_submissions").update(reviewUpdate).eq("id",submission.id).eq("status","pending").select("id").maybeSingle();
   if(reviewed.error)throw reviewed.error;
   if(!reviewed.data)throw new Error("Cette contribution a déjà été traitée.");
   await loadAdminContributions();
@@ -444,7 +448,7 @@ $("#articleForm").addEventListener("submit",async e=>{
  const body=$("#articleBody").value.trim();if(body.length<30){notice("Ajoute au moins 30 caractères.");return}
  const payload={title:$("#articleTitle").value.trim(),category:$("#articleCategory").value,excerpt:$("#articleExcerpt").value.trim()||body.slice(0,135),body};
  const wasEditing=Boolean(currentEditingId);
- const submission={...payload,article_id:currentEditingId||crypto.randomUUID(),submission_type:wasEditing?"edit":"new",author_id:user.id,author_name:user.user_metadata?.display_name||"Savoir",status:"pending"};
+ const submission={...payload,article_id:currentEditingId||null,submission_type:wasEditing?"edit":"new",author_id:user.id,author_name:user.user_metadata?.display_name||"Savoir",status:"pending"};
  const result=await sb.from("article_submissions").insert(submission);
  if(result.error){notice("Envoi impossible : "+result.error.message);return}
  currentEditingId=null;$("#articleDialog").close();
