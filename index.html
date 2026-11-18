@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=47">
+  <link rel="stylesheet" href="style.css?v=48">
 </head>
 <body>
   <header class="topbar">
@@ -30,6 +30,7 @@
         <button type="button" data-menu-action="settings">Réglages</button>
         <button type="button" data-menu-action="account">Compte</button>
         <button type="button" data-menu-action="contribution">Contribution</button>
+        <button type="button" data-menu-action="help">Aide</button>
         <button type="button" data-menu-action="admin" id="adminMenuItem" hidden aria-hidden="true" style="display:none">Administration</button>
       </div>
     </div>
@@ -58,6 +59,17 @@
   <dialog id="termsDialog" class="modal terms-dialog"><div class="modal-head"><div><div class="eyebrow">SAVOIR · RÈGLES DU SITE</div><h2>Conditions d’utilisation</h2></div><button type="button" class="close-btn" data-close="termsDialog">×</button></div><div class="terms-content"><p><strong>Dernière mise à jour : 16 novembre 2026 · Version 1.0</strong></p><h3>1. Objet du site</h3><p>Savoir est une encyclopédie collaborative destinée au partage de connaissances et à la consultation d’articles.</p><h3>2. Utilisation du compte</h3><p>Tu t’engages à fournir des informations de compte exactes, à garder ton mot de passe confidentiel et à ne pas utiliser le compte d’une autre personne.</p><h3>3. Contributions et comportement</h3><p>Les articles et commentaires éventuels doivent rester utiles, respectueux et de bonne foi. Les contenus insultants, trompeurs, discriminatoires, illicites ou portant atteinte à la vie privée ne sont pas autorisés. Ne publie pas d’informations personnelles ou confidentielles.</p><h3>4. Droits sur les contenus</h3><p>Tu ne dois publier que des textes, images et autres éléments que tu as créés ou que tu es autorisé à utiliser. Tu conserves tes droits sur tes contributions et autorises Savoir à les héberger, afficher et mettre en forme sur le site pour son fonctionnement.</p><h3>5. Modération</h3><p>Les administrateurs peuvent vérifier, modifier pour corriger la présentation, masquer ou supprimer les contributions qui ne respectent pas ces règles, et limiter l’accès aux comptes en cas d’abus.</p><h3>6. Responsabilité</h3><p>Tu es responsable des contenus que tu publies. Vérifie les informations avant de les partager et indique clairement les incertitudes.</p><h3>7. Disponibilité et évolution</h3><p>Le site peut évoluer, être temporairement indisponible ou voir certaines fonctionnalités modifiées. Les conditions peuvent être mises à jour ; une nouvelle acceptation pourra alors être demandée.</p><h3>8. Données personnelles</h3><p>Les informations de compte sont utilisées pour faire fonctionner les fonctions de connexion et de contribution. Évite de publier des données personnelles dans les articles. Ces conditions ne remplacent pas une politique de confidentialité.</p></div><button type="button" class="btn btn-dark full" data-close="termsDialog">Fermer</button></dialog>
   <dialog id="termsGateDialog" class="modal terms-dialog terms-gate"><div class="modal-head"><div><div class="eyebrow">ÉTAPE OBLIGATOIRE</div><h2>Conditions d’utilisation</h2></div></div><div class="terms-content"><p>Avant d’accéder à ton espace membre, tu dois lire et accepter les conditions d’utilisation de Savoir.</p><p>Elles expliquent les règles de contribution, les droits sur les contenus et la modération du site.</p></div><button type="button" class="btn btn-light full" id="reviewTerms">Lire les conditions d’utilisation</button><button type="button" class="btn btn-dark full" id="acceptTerms">J’accepte les conditions</button></dialog>
   <dialog id="passwordRecoveryDialog" class="modal"><form id="passwordRecoveryForm"><div class="modal-head"><div><div class="eyebrow">RÉCUPÉRATION DU COMPTE</div><h2>Nouveau mot de passe</h2></div></div><label for="recoveryNewPassword">Nouveau mot de passe</label><input id="recoveryNewPassword" type="password" minlength="8" required autocomplete="new-password" placeholder="8 caractères minimum"><button class="btn btn-dark full" id="saveRecoveryPassword" type="submit">Enregistrer le mot de passe</button></form></dialog>
+
+  <dialog id="helpDialog" class="modal">
+    <div class="modal-head"><div><div class="eyebrow">CENTRE D’ASSISTANCE</div><h2>Aide</h2></div><button type="button" class="close-btn" data-close="helpDialog">×</button></div>
+    <div class="terms-content">
+      <h3>Explorer les articles</h3><p>Utilise la barre de recherche pour trouver un sujet. Tu peux aussi filtrer les articles par thème et les trier.</p>
+      <h3>Ton compte</h3><p>Ouvre le menu puis « Compte » pour gérer ton profil et tes informations de connexion.</p>
+      <h3>Proposer un article</h3><p>Dans « Contribution », rédige ton article puis envoie-le. Il sera examiné par un administrateur avant sa publication.</p>
+      <h3>Notifications</h3><p>La cloche t’informe de l’évolution de tes contributions et des demandes en attente pour les administrateurs.</p>
+      <h3>Personnaliser le site</h3><p>Dans « Réglages », tu peux modifier le thème et les préférences disponibles.</p>
+    </div><button type="button" class="btn btn-dark full" data-close="helpDialog">Fermer</button>
+  </dialog>
   <dialog id="settingsDialog" class="modal settings-modal">
     <div class="modal-head"><div><div class="eyebrow">PERSONNALISATION</div><h2>Réglages</h2></div><button type="button" class="close-btn" data-close="settingsDialog">×</button></div>
     <p class="settings-description">Choisis l'apparence du site.</p>
