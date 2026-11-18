@@ -60,12 +60,44 @@ function draw(){
  renderRecommendations();
 }
 async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
+const NOTIFICATION_READ_KEY="savoir-notifications-read-v1";
+let siteNotifications=[];
+function notificationReadIds(){try{return JSON.parse(localStorage.getItem(NOTIFICATION_READ_KEY+"-"+user.id)||"[]")}catch{return[]}}
+function renderNotifications(){
+ const list=$("#notificationList"),badge=$("#notificationBadge"),read=new Set(notificationReadIds());
+ if(!user){list.innerHTML='<p class="notification-empty">Connecte-toi pour voir tes notifications.</p>';badge.hidden=true;$("#notificationToggle").setAttribute("aria-label","Notifications");return}
+ const unread=siteNotifications.filter(n=>!read.has(n.id)).length;
+ badge.hidden=unread===0;badge.textContent=unread>99?"99+":String(unread);
+ $("#notificationToggle").setAttribute("aria-label",unread?("Notifications, "+unread+" non lue"+(unread>1?"s":"")):"Notifications");
+ if(!siteNotifications.length){list.innerHTML='<p class="notification-empty">Aucune notification pour le moment.</p>';return}
+ list.innerHTML=siteNotifications.map(n=>'<article class="notification-item '+(read.has(n.id)?"is-read":"is-unread")+'"><span class="notification-dot"></span><div><strong>'+esc(n.title)+'</strong><p>'+esc(n.message)+'</p><time>'+date(n.created_at)+'</time></div></article>').join("");
+}
+async function loadNotifications(){
+ if(!user){siteNotifications=[];renderNotifications();return}
+ try{
+  let q=sb.from("article_submissions").select("id,title,status,submission_type,created_at,reviewed_at,author_id");
+  q=isAdmin()?q.or("status.eq.pending,author_id.eq."+user.id):q.eq("author_id",user.id);
+  const result=await q.order("created_at",{ascending:false}).limit(30);
+  if(result.error)throw result.error;
+  siteNotifications=(result.data||[]).map(s=>{
+   const pending=s.status==="pending";
+   return {id:s.id,title:pending?(isAdmin()?"Contribution à valider":"Contribution envoyée"):(s.status==="approved"?"Contribution approuvée":"Contribution refusée"),message:pending?(isAdmin()?"Un article attend ta validation : "+s.title:"Ta contribution « "+s.title+" » est en attente de validation."):(s.status==="approved"?"Ta contribution « "+s.title+" » a été approuvée et publiée.":"Ta contribution « "+s.title+" » n’a pas été retenue."),created_at:s.reviewed_at||s.created_at};
+  });
+ }catch(error){console.error("Chargement des notifications impossible :",error);siteNotifications=[]}
+ renderNotifications();
+}
+function markNotificationsRead(){
+ if(!user)return;
+ try{localStorage.setItem(NOTIFICATION_READ_KEY+"-"+user.id,JSON.stringify(siteNotifications.map(n=>n.id)))}catch{}
+ renderNotifications();
+}
+
 function isAdmin(){return user?.app_metadata?.role==="admin"}
 function updateAuthStatus(){const status=$("#authStatus");if(status){status.textContent=user?"Connecté":"Vous n’êtes pas connecté";status.classList.toggle("is-connected",Boolean(user));}}
 function updateAdminMenu(){updateAuthStatus();const item=$("#adminMenuItem");if(item){const visible=Boolean(user&&isAdmin());item.hidden=!visible;item.style.display=visible?"block":"none";item.setAttribute("aria-hidden",String(!visible));}const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
 function hasAcceptedTerms(u=user){return u?.user_metadata?.terms_version===TERMS_VERSION}
 async function requireTermsAcceptance(){if(!user||hasAcceptedTerms())return;const dialog=$("#termsGateDialog");if(!dialog.open)dialog.showModal()}
-async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance();await load()}else if(!recoveryLinkPending){const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
+async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance();await load();await loadNotifications()}else if(!recoveryLinkPending){const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
 function renderAdminUsers(){
  if(adminUsersError){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=adminUsersError;$("#adminUsersTableWrap").hidden=true;$("#loadMoreAdminUsers").hidden=true;return}
  const term=$("#adminUsersSearch").value.trim().toLowerCase();
@@ -452,12 +484,16 @@ $("#articleForm").addEventListener("submit",async e=>{
  const result=await sb.from("article_submissions").insert(submission);
  if(result.error){notice("Envoi impossible : "+result.error.message);return}
  currentEditingId=null;$("#articleDialog").close();
+ await loadNotifications();
  notice(wasEditing?"Modification envoyée à l’administration pour validation.":"Contribution envoyée à l’administration pour validation.");
 });
+$("#notificationToggle").addEventListener("click",async()=>{const panel=$("#notificationPanel"),opening=panel.hidden;panel.hidden=!opening;$("#notificationToggle").setAttribute("aria-expanded",String(opening));if(opening){await loadNotifications();markNotificationsRead()}});
+$("#markNotificationsRead").addEventListener("click",markNotificationsRead);
+document.addEventListener("click",e=>{if(!e.target.closest(".notification-wrap")){$("#notificationPanel").hidden=true;$("#notificationToggle").setAttribute("aria-expanded","false")}});
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
 $("#showMoreRecommendations").addEventListener("click",()=>{query="";$("#searchInput").value="";allArticlesView=true;window.history.pushState({view:"articles"},"","#articles");draw();window.scrollTo({top:0,behavior:"smooth"})});
 
 $("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
-sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();const gate=$("#loginDialog");if(event==="PASSWORD_RECOVERY"){recoveryLinkPending=false;if(gate.open)gate.close();if(!$("#passwordRecoveryDialog").open)$("#passwordRecoveryDialog").showModal();return}if(user){if(gate.open)gate.close();}else if(!recoveryLinkPending&&!gate.open)gate.showModal()});
+sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user)loadNotifications();else{siteNotifications=[];renderNotifications()}const gate=$("#loginDialog");if(event==="PASSWORD_RECOVERY"){recoveryLinkPending=false;if(gate.open)gate.close();if(!$("#passwordRecoveryDialog").open)$("#passwordRecoveryDialog").showModal();return}if(user){if(gate.open)gate.close();}else if(!recoveryLinkPending&&!gate.open)gate.showModal()});
 $("#loginDialog").addEventListener("cancel",e=>e.preventDefault());
 (async()=>{await syncUser()})();
