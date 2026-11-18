@@ -494,7 +494,7 @@ async function loadAdminHelpRequests(){
   $("#adminHelpCount").textContent=requests.length+" demande"+(requests.length>1?"s":"")+" · "+pending+" en attente";
   message.hidden=requests.length>0;
   if(!requests.length)message.textContent="Aucune demande d’aide pour le moment.";
-  list.innerHTML=requests.map(r=>'<article class="admin-submission-card" data-ticket-card="'+esc(r.id)+'" data-ticket-number="'+esc(r.ticket_number||"")+'">'+
+  list.innerHTML=requests.map(r=>'<article class="admin-submission-card" data-ticket-card="'+esc(r.id)+'" data-ticket-number="'+esc(r.ticket_number||"")+'" data-ticket-status="'+esc(r.status)+'">'+
    '<div class="admin-submission-top"><span class="tag">'+(r.status==="pending"?"En attente":"Traitée")+'</span><span class="admin-submission-date">'+date(r.created_at)+'</span></div>'+
    '<p class="admin-submission-meta"><strong>Ticket n° '+esc(r.ticket_number||"Non attribué")+'</strong></p>'+
    '<h4>'+esc(r.subject)+'</h4><p class="admin-submission-meta">'+esc(r.user_name)+' · '+esc(r.user_email||"E-mail non renseigné")+'</p>'+
@@ -506,19 +506,24 @@ async function loadAdminHelpRequests(){
  }catch(error){message.hidden=false;message.textContent="Impossible de charger les demandes : "+(error.message||"erreur inconnue");list.innerHTML="";}
  finally{button.disabled=false}
 }
+let hideClosedAdminTickets=false;
 function filterAdminHelpTickets(){
- const input=$("#adminHelpTicketSearch"),list=$("#adminHelpList"),empty=$("#adminHelpSearchEmpty");
+ const input=$("#adminHelpTicketSearch"),list=$("#adminHelpList"),empty=$("#adminHelpSearchEmpty"),toggle=$("#toggleClosedAdminTickets");
  if(!input||!list||!empty)return;
  const query=input.value.trim().toLowerCase();
  let visible=0;
  list.querySelectorAll("[data-ticket-card]").forEach(card=>{
   const matches=(card.dataset.ticketNumber||"").toLowerCase().includes(query);
-  card.hidden=!matches;
-  if(matches)visible++;
+  const isClosed=card.dataset.ticketStatus!=="pending";
+  const show=matches&&!(hideClosedAdminTickets&&isClosed);
+  card.hidden=!show;
+  if(show)visible++;
  });
  empty.hidden=!query||visible>0;
+ if(toggle)toggle.textContent=hideClosedAdminTickets?"Afficher les tickets clôturés":"Masquer les tickets clôturés";
 }
 $("#adminHelpTicketSearch").addEventListener("input",filterAdminHelpTickets);
+$("#toggleClosedAdminTickets").addEventListener("click",()=>{hideClosedAdminTickets=!hideClosedAdminTickets;filterAdminHelpTickets();});
 async function handleHelpThreadAction(e,adminView){
  const button=e.target.closest("[data-help-thread]");if(!button)return;
  await openHelpThread(button.dataset.helpThread,button.closest(".admin-submission-card"),adminView,button);
