@@ -411,6 +411,7 @@ async function loadAdminHelpRequests(){
   if(!requests.length)message.textContent="Aucune demande d’aide pour le moment.";
   list.innerHTML=requests.map(r=>'<article class="admin-submission-card">'+
    '<div class="admin-submission-top"><span class="tag">'+(r.status==="pending"?"En attente":"Traitée")+'</span><span class="admin-submission-date">'+date(r.created_at)+'</span></div>'+
+   '<p class="admin-submission-meta"><strong>Ticket n° '+esc(r.ticket_number||"Non attribué")+'</strong></p>'+
    '<h4>'+esc(r.subject)+'</h4><p class="admin-submission-meta">'+esc(r.user_name)+' · '+esc(r.user_email||"E-mail non renseigné")+'</p>'+
    '<p class="admin-submission-body">'+esc(r.message)+'</p>'+
    (r.status==="pending"?'<div class="admin-submission-actions"><button type="button" class="btn btn-dark" data-help-resolve="'+esc(r.id)+'">Marquer comme traitée</button></div>':"")+
@@ -433,10 +434,11 @@ $("#helpRequestForm").addEventListener("submit",async e=>{
  if(message.length<10){notice("Ton message doit contenir au moins 10 caractères.");return}
  button.disabled=true;button.textContent="Envoi…";
  try{
-  const result=await sb.from("help_requests").insert({user_id:user.id,user_name:user.user_metadata?.display_name||"Membre",user_email:user.email||null,subject:$("#helpRequestSubject").value,message});
+  const result=await sb.from("help_requests").insert({user_id:user.id,user_name:user.user_metadata?.display_name||"Membre",user_email:user.email||null,subject:$("#helpRequestSubject").value,message}).select("ticket_number").single();
   if(result.error)throw result.error;
-  $("#helpRequestForm").reset();$("#helpRequestStatus").textContent="Ta demande a bien été envoyée à l’administrateur.";
-  notice("Demande d’aide envoyée.");
+  const ticket=result.data.ticket_number;
+  $("#helpRequestForm").reset();$("#helpRequestStatus").textContent="Demande envoyée avec succès. Ton numéro de ticket est "+ticket+". Conserve-le pour le suivi.";
+  notice("Demande envoyée · Ticket "+ticket);
  }catch(error){notice("Envoi impossible : "+(error.message||"réessaie plus tard."));}
  finally{button.disabled=false;button.textContent="Envoyer la demande";}
 });
