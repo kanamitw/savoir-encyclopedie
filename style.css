@@ -818,3 +818,7 @@ body[data-theme="christmas"] .notification-item{border-color:#345342!important}
 body[data-theme="christmas"] .notification-item p,body[data-theme="christmas"] .notification-item time{color:#e7d9bd!important}
 body[data-theme="christmas"] .notification-panel-head button{color:#e6bd62!important}
 @media(max-width:560px){.notification-trigger{width:35px;height:35px}.notification-panel{right:-44px}}
+
+/* Bouton notifications : mêmes dimensions que le bouton Menu */
+.notification-trigger{width:65px;height:38px;min-width:65px;padding:0 12px;border-radius:8px}
+@media(max-width:560px){.notification-trigger{width:64px;height:36px;min-width:64px;padding:0 12px}}
