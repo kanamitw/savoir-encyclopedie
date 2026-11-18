@@ -871,3 +871,8 @@ body[data-theme="christmas"] .notification-panel-head button{color:#e6bd62!impor
   transform:scale(.96);
   box-shadow:none;
 }
+
+
+/* Petit espacement entre les boutons Notifications et Menu */
+.topbar>.notification-wrap{margin-right:10px}
+@media(max-width:650px){.topbar>.notification-wrap{margin-right:8px}}
