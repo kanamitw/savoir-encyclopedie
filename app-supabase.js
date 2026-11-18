@@ -312,7 +312,7 @@ menuDropdown.addEventListener("click",async e=>{
  if(!action)return;
  menuDropdown.hidden=true;menuToggle.setAttribute("aria-expanded","false");
  if(action==="settings")$("#settingsDialog").showModal();
- if(action==="help")$("#helpDialog").showModal();
+ if(action==="help"){ $("#helpDialog").showModal();loadMyHelpRequests(); }
  if(action==="account"){if(user){$("#accountEmail").textContent=user.email||"Compte connecté";$("#accountUsername").value=user.user_metadata?.display_name||"";$("#accountNewEmail").value="";$("#accountNewPassword").value="";$("#mfaEnrollBox").hidden=true;await refreshMfa();$("#accountDialog").showModal()}else $("#loginDialog").showModal()}
  if(action==="contribution")openWrite();
  if(action==="admin"){if(!isAdmin()){notice("Accès réservé aux administrateurs.");return}$("#adminAccountEmail").textContent=user.email||"Compte administrateur";$("#adminDialog").showModal();if(!adminUsers.length)loadAdminUsers(true);loadAdminContributions();loadAdminHelpRequests()}
@@ -398,6 +398,22 @@ $("#disableMfa").addEventListener("click",async()=>{
  notice("Double authentification désactivée.");await refreshMfa();
 });
 
+async function loadMyHelpRequests(){
+ const message=$("#myHelpRequestsMessage"),list=$("#myHelpRequestsList");
+ if(!message||!list)return;
+ if(!user){message.textContent="Connecte-toi pour retrouver tes tickets.";list.innerHTML="";return}
+ message.hidden=false;message.textContent="Chargement de tes demandes…";
+ try{
+  const result=await sb.from("help_requests").select("ticket_number,subject,status,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(50);
+  if(result.error)throw result.error;
+  const requests=result.data||[];
+  message.hidden=requests.length>0;
+  if(!requests.length)message.textContent="Tu n’as pas encore envoyé de demande d’aide.";
+  list.innerHTML=requests.map(r=>'<article class="admin-submission-card"><div class="admin-submission-top"><span class="tag">'+(r.status==="pending"?"En attente":"Traitée")+'</span><span class="admin-submission-date">'+date(r.created_at)+'</span></div><p class="admin-submission-meta"><strong>Ticket n° '+esc(r.ticket_number||"Non attribué")+'</strong></p><h4>'+esc(r.subject)+'</h4></article>').join("");
+ }catch(error){
+  message.hidden=false;message.textContent="Impossible de charger tes tickets : "+(error.message||"erreur inconnue");list.innerHTML="";
+ }
+}
 async function loadAdminHelpRequests(){
  if(!isAdmin())return;
  const message=$("#adminHelpMessage"),list=$("#adminHelpList"),button=$("#refreshAdminHelp");
@@ -438,7 +454,7 @@ $("#helpRequestForm").addEventListener("submit",async e=>{
   if(result.error)throw result.error;
   const ticket=result.data.ticket_number;
   $("#helpRequestForm").reset();$("#helpRequestStatus").textContent="Demande envoyée avec succès. Ton numéro de ticket est "+ticket+". Conserve-le pour le suivi.";
-  notice("Demande envoyée · Ticket "+ticket);
+  notice("Demande envoyée · Ticket "+ticket);await loadMyHelpRequests();
  }catch(error){notice("Envoi impossible : "+(error.message||"réessaie plus tard."));}
  finally{button.disabled=false;button.textContent="Envoyer la demande";}
 });
