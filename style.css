@@ -387,7 +387,7 @@ body[data-theme="christmas"] .article-arrow{color:#9a2938}
 /* Noël version festive : forêt, tapisseries, guirlande et neige */
 body[data-theme="christmas"]{--bg:#10271f;--surface:#fffaf0;--ink:#20382d;--muted:#68786d;--line:#d9cba9;--soft:#f1e7d2;--accent:#a32335;color-scheme:light;background-color:#10271f;background-image:radial-gradient(ellipse at 12% 18%,rgba(190,35,54,.24),transparent 32%),radial-gradient(ellipse at 88% 34%,rgba(209,173,83,.2),transparent 30%),repeating-linear-gradient(135deg,rgba(255,255,255,.04) 0 2px,transparent 2px 34px)}
 body[data-theme="christmas"] .topbar{background:#10271ff2;border-bottom:1px solid #b18a49;box-shadow:0 3px 18px #0005}
-body[data-theme="christmas"] .brand,body[data-theme="christmas"] .topbar .auth-status{color:#fff8e9}
+body[data-theme="christmas"] .brand{color:#fff8e9}
 body[data-theme="christmas"] .brand-dot,body[data-theme="christmas"] .hero h1 span{color:#e6bd62}
 body[data-theme="christmas"] .brand-mark{background:#a32335;color:#fff;border-color:#e6bd62}
 body[data-theme="christmas"] .hero{background:linear-gradient(145deg,rgba(9,48,34,.96),rgba(20,65,45,.92));border-bottom:1px solid #b18a49;position:relative;overflow:hidden}
@@ -749,7 +749,6 @@ body.all-articles-view .section-heading h2{font-size:23px}
 .topbar-search-slot .search-icon{font-size:19px;margin-right:9px}
 .topbar-search-slot .search-wrap input{font-size:12px}
 .topbar-search-slot #backToRecommendations{margin:0;padding:10px 13px;font-size:10px}
-.topbar .auth-status{margin-left:0}
 @media(max-width:760px){
  .topbar-search-slot{margin:0 12px;gap:6px}
  .topbar-search-slot .search-wrap{height:36px;padding:0 8px}
@@ -761,7 +760,6 @@ body.all-articles-view .section-heading h2{font-size:23px}
  .topbar-search-slot #backToRecommendations{white-space:normal;max-width:105px;line-height:1.2}
  .topbar-search-slot .search-icon{display:none}
  .topbar-search-slot .search-wrap input{font-size:10px}
- .auth-status{display:none}
 }
 
 .search-result-count{flex:0 0 auto;margin-left:12px;color:#858b7d;font:10px "DM Sans";white-space:nowrap}
