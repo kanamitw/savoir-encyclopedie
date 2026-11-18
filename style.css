@@ -929,3 +929,10 @@ body[data-theme="christmas"] .help-chat-message{background:#17382b!important;bor
 body[data-theme="christmas"] .help-chat-message.from-admin{border-color:#b18a49!important}
 body[data-theme="christmas"] .help-chat-meta strong,body[data-theme="christmas"] .help-chat-message p,body[data-theme="christmas"] .help-reply-form label{color:#fff1d5!important}
 body[data-theme="christmas"] .help-reply-form textarea{background:#17382b!important;border-color:#45654f!important;color:#fff1d5!important}
+
+
+/* Notifications interactives */
+.notification-item[role="button"]{width:100%;text-align:left;cursor:pointer;border-radius:7px;transition:background .16s,opacity .16s}
+.notification-item[role="button"]:hover{background:var(--soft)}
+.notification-item[role="button"]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body[data-theme="christmas"] .notification-item[role="button"]:hover{background:#1d4533!important}
