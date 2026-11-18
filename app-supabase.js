@@ -61,42 +61,91 @@ function draw(){
 }
 async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
 const NOTIFICATION_READ_KEY="savoir-notifications-read-v1";
-let siteNotifications=[];
+let siteNotifications=[],notificationChannel=null;
 function notificationReadIds(){try{return JSON.parse(localStorage.getItem(NOTIFICATION_READ_KEY+"-"+user.id)||"[]")}catch{return[]}}
 function renderNotifications(){
- const list=$("#notificationList"),badge=$("#notificationBadge"),read=new Set(notificationReadIds());
+ const list=$("#notificationList"),badge=$("#notificationBadge");
  if(!user){list.innerHTML='<p class="notification-empty">Connecte-toi pour voir tes notifications.</p>';badge.hidden=true;$("#notificationToggle").setAttribute("aria-label","Notifications");return}
- const unread=siteNotifications.filter(n=>!read.has(n.id)).length;
+ const unread=siteNotifications.filter(n=>!n.read).length;
  badge.hidden=unread===0;badge.textContent=unread>99?"99+":String(unread);
  $("#notificationToggle").setAttribute("aria-label",unread?("Notifications, "+unread+" non lue"+(unread>1?"s":"")):"Notifications");
  if(!siteNotifications.length){list.innerHTML='<p class="notification-empty">Aucune notification pour le moment.</p>';return}
- list.innerHTML=siteNotifications.map(n=>'<article class="notification-item '+(read.has(n.id)?"is-read":"is-unread")+'"><span class="notification-dot"></span><div><strong>'+esc(n.title)+'</strong><p>'+esc(n.message)+'</p><time>'+date(n.created_at)+'</time></div></article>').join("");
+ list.innerHTML=siteNotifications.map(n=>'<article class="notification-item '+(n.read?"is-read":"is-unread")+'" role="button" tabindex="0" data-notification-id="'+esc(n.id)+'" data-notification-source="'+n.source+'" '+(n.ticket_id?'data-ticket-id="'+esc(n.ticket_id)+'"':'')+'><span class="notification-dot"></span><div><strong>'+esc(n.title)+'</strong><p>'+esc(n.message)+'</p><time>'+date(n.created_at)+'</time></div></article>').join("");
 }
 async function loadNotifications(){
  if(!user){siteNotifications=[];renderNotifications();return}
  try{
-  let q=sb.from("article_submissions").select("id,title,status,submission_type,created_at,reviewed_at,author_id");
-  q=isAdmin()?q.or("status.eq.pending,author_id.eq."+user.id):q.eq("author_id",user.id);
-  const result=await q.order("created_at",{ascending:false}).limit(30);
-  if(result.error)throw result.error;
-  siteNotifications=(result.data||[]).map(s=>{
+  const [tickets,contributions]=await Promise.all([
+   sb.from("notifications").select("id,title,message,notification_type,ticket_id,created_at,read_at").order("created_at",{ascending:false}).limit(50),
+   (async()=>{let q=sb.from("article_submissions").select("id,title,status,submission_type,created_at,reviewed_at,author_id");q=isAdmin()?q.or("status.eq.pending,author_id.eq."+user.id):q.eq("author_id",user.id);return await q.order("created_at",{ascending:false}).limit(30)})()
+  ]);
+  if(tickets.error)throw tickets.error;
+  if(contributions.error)throw contributions.error;
+  const readIds=new Set(notificationReadIds());
+  const ticketItems=(tickets.data||[]).map(n=>({...n,source:"ticket",read:Boolean(n.read_at)}));
+  const contributionItems=(contributions.data||[]).map(s=>{
    const pending=s.status==="pending";
-   return {id:s.id,title:pending?(isAdmin()?"Contribution à valider":"Contribution envoyée"):(s.status==="approved"?"Contribution approuvée":"Contribution refusée"),message:pending?(isAdmin()?"Un article attend ta validation : "+s.title:"Ta contribution « "+s.title+" » est en attente de validation."):(s.status==="approved"?"Ta contribution « "+s.title+" » a été approuvée et publiée.":"Ta contribution « "+s.title+" » n’a pas été retenue."),created_at:s.reviewed_at||s.created_at};
+   return {id:s.id,source:"contribution",ticket_id:null,read:readIds.has(s.id),title:pending?(isAdmin()?"Contribution à valider":"Contribution envoyée"):(s.status==="approved"?"Contribution approuvée":"Contribution refusée"),message:pending?(isAdmin()?"Un article attend ta validation : "+s.title:"Ta contribution « "+s.title+" » est en attente de validation."):(s.status==="approved"?"Ta contribution « "+s.title+" » a été approuvée et publiée.":"Ta contribution « "+s.title+" » n’a pas été retenue."),created_at:s.reviewed_at||s.created_at};
   });
+  siteNotifications=[...ticketItems,...contributionItems].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,60);
  }catch(error){console.error("Chargement des notifications impossible :",error);siteNotifications=[]}
  renderNotifications();
 }
-function markNotificationsRead(){
+async function markNotificationsRead(){
  if(!user)return;
- try{localStorage.setItem(NOTIFICATION_READ_KEY+"-"+user.id,JSON.stringify(siteNotifications.map(n=>n.id)))}catch{}
- renderNotifications();
+ const unreadTickets=siteNotifications.filter(n=>n.source==="ticket"&&!n.read).map(n=>n.id);
+ const contributionIds=siteNotifications.filter(n=>n.source==="contribution").map(n=>n.id);
+ try{
+  if(unreadTickets.length){const r=await sb.from("notifications").update({read_at:new Date().toISOString()}).in("id",unreadTickets);if(r.error)throw r.error}
+  localStorage.setItem(NOTIFICATION_READ_KEY+"-"+user.id,JSON.stringify([...new Set([...notificationReadIds(),...contributionIds])]));
+  await loadNotifications();
+ }catch(error){notice("Impossible de marquer les notifications comme lues : "+(error.message||"erreur inconnue"))}
 }
-
+async function markOneNotificationRead(n){
+ if(!n||n.read)return;
+ if(n.source==="ticket"){
+  const r=await sb.from("notifications").update({read_at:new Date().toISOString()}).eq("id",n.id);
+  if(r.error)throw r.error;
+ }else{
+  localStorage.setItem(NOTIFICATION_READ_KEY+"-"+user.id,JSON.stringify([...new Set([...notificationReadIds(),n.id])]));
+ }
+ await loadNotifications();
+}
+function subscribeNotifications(){
+ if(notificationChannel){sb.removeChannel(notificationChannel);notificationChannel=null}
+ if(!user)return;
+ notificationChannel=sb.channel("user-notifications-"+user.id)
+  .on("postgres_changes",{event:"INSERT",schema:"public",table:"notifications",filter:"user_id=eq."+user.id},payload=>{
+   loadNotifications();
+   const incoming=payload.new;
+   if(incoming?.title)notice(incoming.title);
+  }).subscribe();
+}
+async function openTicketFromNotification(n){
+ if(!n?.ticket_id)return;
+ if(isAdmin()){
+  if(!$("#adminDialog").open)$("#adminDialog").showModal();
+  await loadAdminHelpRequests();
+  const card=Array.from($("#adminHelpList").querySelectorAll("[data-ticket-card]")).find(x=>x.dataset.ticketCard===n.ticket_id);
+  if(card){const button=card.querySelector("[data-help-thread]");if(button)await openHelpThread(n.ticket_id,card,true,button);card.scrollIntoView({behavior:"smooth",block:"center"})}
+ }else{
+  if(!$("#helpDialog").open)$("#helpDialog").showModal();
+  await loadMyHelpRequests();
+  const card=Array.from($("#myHelpRequestsList").querySelectorAll("[data-ticket-card]")).find(x=>x.dataset.ticketCard===n.ticket_id);
+  if(card){const button=card.querySelector("[data-help-thread]");if(button)await openHelpThread(n.ticket_id,card,false,button);card.scrollIntoView({behavior:"smooth",block:"center"})}
+ }
+}
+async function handleNotificationOpen(item){
+ const n=siteNotifications.find(x=>x.id===item.dataset.notificationId);
+ if(!n)return;
+ try{await markOneNotificationRead(n);if(n.source==="ticket")await openTicketFromNotification(n)}
+ catch(error){notice("Impossible d’ouvrir la notification : "+(error.message||"erreur inconnue"))}
+}
 function isAdmin(){return user?.app_metadata?.role==="admin"}
 function updateAdminMenu(){const item=$("#adminMenuItem");if(item){const visible=Boolean(user&&isAdmin());item.hidden=!visible;item.style.display=visible?"block":"none";item.setAttribute("aria-hidden",String(!visible));}const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
 function hasAcceptedTerms(u=user){return u?.user_metadata?.terms_version===TERMS_VERSION}
 async function requireTermsAcceptance(){if(!user||hasAcceptedTerms())return;const dialog=$("#termsGateDialog");if(!dialog.open)dialog.showModal()}
-async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance();await load();await loadNotifications()}else if(!recoveryLinkPending){const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
+async function syncUser(){const r=await sb.auth.getUser();user=r.data.user;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user){const gate=$("#loginDialog");if(gate.open)gate.close();await requireTermsAcceptance();await load();subscribeNotifications();await loadNotifications()}else if(!recoveryLinkPending){const gate=$("#loginDialog");if(!gate.open)gate.showModal()}}
 function renderAdminUsers(){
  if(adminUsersError){$("#adminUsersMessage").hidden=false;$("#adminUsersMessage").textContent=adminUsersError;$("#adminUsersTableWrap").hidden=true;$("#loadMoreAdminUsers").hidden=true;return}
  const term=$("#adminUsersSearch").value.trim().toLowerCase();
@@ -592,13 +641,15 @@ $("#articleForm").addEventListener("submit",async e=>{
  await loadNotifications();
  notice(wasEditing?"Modification envoyée à l’administration pour validation.":"Contribution envoyée à l’administration pour validation.");
 });
-$("#notificationToggle").addEventListener("click",async()=>{const panel=$("#notificationPanel"),opening=panel.hidden;panel.hidden=!opening;$("#notificationToggle").setAttribute("aria-expanded",String(opening));if(opening){await loadNotifications();markNotificationsRead()}});
+$("#notificationToggle").addEventListener("click",async()=>{const panel=$("#notificationPanel"),opening=panel.hidden;panel.hidden=!opening;$("#notificationToggle").setAttribute("aria-expanded",String(opening));if(opening)await loadNotifications()});
+$("#notificationList").addEventListener("click",e=>{const item=e.target.closest("[data-notification-id]");if(item)handleNotificationOpen(item)});
+$("#notificationList").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-notification-id]")){e.preventDefault();handleNotificationOpen(e.target)}});
 $("#markNotificationsRead").addEventListener("click",markNotificationsRead);
 document.addEventListener("click",e=>{if(!e.target.closest(".notification-wrap")){$("#notificationPanel").hidden=true;$("#notificationToggle").setAttribute("aria-expanded","false")}});
 $("#resetSearch").addEventListener("click",()=>{query="";category="Tous";$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
 $("#showMoreRecommendations").addEventListener("click",()=>{query="";$("#searchInput").value="";allArticlesView=true;window.history.pushState({view:"articles"},"","#articles");draw();window.scrollTo({top:0,behavior:"smooth"})});
 
 $("#resetRecommendations").addEventListener("click",()=>{try{localStorage.removeItem(READING_KEY)}catch{}renderRecommendations();notice("Tes recommandations ont été réinitialisées.")});
-sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();if(user)loadNotifications();else{siteNotifications=[];renderNotifications()}const gate=$("#loginDialog");if(event==="PASSWORD_RECOVERY"){recoveryLinkPending=false;if(gate.open)gate.close();if(!$("#passwordRecoveryDialog").open)$("#passwordRecoveryDialog").showModal();return}if(user){if(gate.open)gate.close();}else if(!recoveryLinkPending&&!gate.open)gate.showModal()});
+sb.auth.onAuthStateChange((event,s)=>{user=s?s.user:null;$("#accountEmail").textContent=user?(user.email||"Compte connecté"):"";updateAdminMenu();subscribeNotifications();if(user)loadNotifications();else{siteNotifications=[];renderNotifications()}const gate=$("#loginDialog");if(event==="PASSWORD_RECOVERY"){recoveryLinkPending=false;if(gate.open)gate.close();if(!$("#passwordRecoveryDialog").open)$("#passwordRecoveryDialog").showModal();return}if(user){if(gate.open)gate.close();}else if(!recoveryLinkPending&&!gate.open)gate.showModal()});
 $("#loginDialog").addEventListener("cancel",e=>e.preventDefault());
 (async()=>{await syncUser()})();
