@@ -171,6 +171,7 @@ function renderAdminUsers(){
    (status!=="approved"?'<button type="button" class="btn btn-light" data-user-action="approve" data-user-id="'+esc(u.id)+'">Approuver</button>':"")+
    (status==="pending"?'<button type="button" class="btn btn-light" data-user-action="reject" data-user-id="'+esc(u.id)+'">Refuser</button>':"")+
    (status==="approved"?'<button type="button" class="btn '+(banned?"btn-light":"btn-dark")+'" data-user-action="'+(banned?"unban":"ban")+'" data-user-id="'+esc(u.id)+'">'+(banned?"Débannir":"Bannir")+'</button>':"")+
+   (status==="approved"?'<button type="button" class="btn btn-light" data-user-action="promote" data-user-id="'+esc(u.id)+'">Promouvoir admin</button>':"")+
    '</div>';
   const toggles=status==="approved"&&!admin?'<div class="admin-permission-toggles">'+
    '<button type="button" class="permission-toggle '+(u.can_edit_articles?"is-on":"")+'" role="switch" aria-checked="'+String(Boolean(u.can_edit_articles))+'" aria-label="Autoriser la modification" data-user-action="edit-permission" data-permission="can_edit_articles" data-user-id="'+esc(u.id)+'"><span></span></button><span>Modification</span>'+
@@ -208,7 +209,7 @@ $("#adminUsersTable").addEventListener("click",async e=>{
  const button=e.target.closest("[data-user-action]");if(!button)return;
  if(!isAdmin())return;
  const action=button.dataset.userAction,id=button.dataset.userId;
- const prompts={approve:"Approuver ce compte ?",reject:"Refuser cette inscription ?",ban:"Bannir ce compte ? La personne ne pourra plus se connecter.",unban:"Débannir ce compte ?","edit-permission":"Modifier le droit de modification ?","delete-permission":"Modifier le droit de suppression ?"};
+ const prompts={approve:"Approuver ce compte ?",reject:"Refuser cette inscription ?",ban:"Bannir ce compte ? La personne ne pourra plus se connecter.",unban:"Débannir ce compte ?",promote:"Promouvoir cette personne administrateur ? Elle aura accès à tout le panneau admin.","edit-permission":"Modifier le droit de modification ?","delete-permission":"Modifier le droit de suppression ?"};
  if(!confirm(prompts[action]||"Confirmer cette action ?"))return;
  button.disabled=true;
  try{
@@ -222,7 +223,7 @@ $("#adminUsersTable").addEventListener("click",async e=>{
   if(result.error)throw result.error;
   if(result.data?.error)throw new Error(result.data.error);
   await loadAdminUsers(true);
-  const messages={approve:"Compte approuvé : la personne peut maintenant se connecter.",reject:"Inscription refusée.",ban:"Compte banni.",unban:"Compte débanni.","edit-permission":"Droit de modification mis à jour.","delete-permission":"Droit de suppression mis à jour."};
+  const messages={approve:"Compte approuvé : la personne peut maintenant se connecter.",reject:"Inscription refusée.",ban:"Compte banni.",unban:"Compte débanni.",promote:"Cette personne est maintenant administratrice.","edit-permission":"Droit de modification mis à jour.","delete-permission":"Droit de suppression mis à jour."};
   notice(messages[action]||"Modification enregistrée.");
  }catch(error){notice("Action impossible : "+(error.message||"erreur inconnue"));button.disabled=false}
 });
