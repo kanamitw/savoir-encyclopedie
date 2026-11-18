@@ -936,3 +936,7 @@ body[data-theme="christmas"] .help-reply-form textarea{background:#17382b!import
 .notification-item[role="button"]:hover{background:var(--soft)}
 .notification-item[role="button"]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 body[data-theme="christmas"] .notification-item[role="button"]:hover{background:#1d4533!important}
+
+
+/* Titre de bienvenue : une seule ligne, taille ajustee au pseudo */
+.hero .hero-copy h1#welcomeHeading{white-space:nowrap!important;width:100%;max-width:100%;letter-spacing:-1.5px}
