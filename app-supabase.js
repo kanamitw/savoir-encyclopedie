@@ -585,6 +585,8 @@ $("#helpRequestForm").addEventListener("submit",async e=>{
 });
 $("#accountLogout").addEventListener("click",async()=>{const r=await sb.auth.signOut();if(r.error){notice("Impossible de se déconnecter.");return}user=null;$("#accountDialog").close();notice("Déconnecté.")});
 $("#authMode").addEventListener("change",e=>{const yes=e.target.value==="signup";$("#displayNameWrap").hidden=!yes;$("#termsAcceptanceWrap").hidden=!yes;$("#termsAccepted").required=yes;if(!yes)$("#termsAccepted").checked=false;$("#forgotPassword").hidden=yes;$("#loginTitle").textContent=yes?"Créer un compte":"Connexion";$("#authSubmit").textContent=yes?"Créer mon compte":"Se connecter"});
+// Toujours ouvrir le formulaire en mode connexion, même si le navigateur a restauré une ancienne sélection.
+$("#authMode").value="login";$("#authMode").dispatchEvent(new Event("change"));
 $("#openTerms").addEventListener("click",()=>$("#termsDialog").showModal());
 $("#reviewTerms").addEventListener("click",()=>$("#termsDialog").showModal());
 $("#termsGateDialog").addEventListener("cancel",e=>e.preventDefault());
