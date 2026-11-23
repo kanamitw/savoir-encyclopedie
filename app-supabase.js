@@ -1,7 +1,7 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{flowType:"pkce",detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
 const TERMS_VERSION="1.0";
 const $=s=>document.querySelector(s);
-let rows=[],user=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,allArticlesView=window.location.hash==="#articles",adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="",adminContributions=[],adminContributionsLoading=false,adminContributionsError="",recoveryLinkPending=new URLSearchParams(window.location.search).has("code")||new URLSearchParams(window.location.hash.slice(1)).get("type")==="recovery";
+let rows=[],user=null,currentDraftId=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,allArticlesView=window.location.hash==="#articles",adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="",adminContributions=[],adminContributionsLoading=false,adminContributionsError="",recoveryLinkPending=new URLSearchParams(window.location.search).has("code")||new URLSearchParams(window.location.hash.slice(1)).get("type")==="recovery";
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
@@ -298,7 +298,12 @@ $("#adminContributionsList").addEventListener("click",async e=>{
   button.disabled=false;
  }
 });
-function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;$("#articleForm").reset();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
+const DRAFT_KEY="savoir-drafts-v1";
+function draftStorageKey(){return DRAFT_KEY+"-"+(user?.id||"guest")}
+function getDrafts(){try{const d=JSON.parse(localStorage.getItem(draftStorageKey())||"[]");return Array.isArray(d)?d:[]}catch{return[]}}
+function persistDrafts(d){try{localStorage.setItem(draftStorageKey(),JSON.stringify(d))}catch{notice("Stockage local indisponible.");}}
+function renderDrafts(){const list=$("#draftsList");if(!list)return;const drafts=getDrafts();if(!drafts.length){list.innerHTML='<p class="form-note">Aucun brouillon enregistré.</p>';return}list.innerHTML=drafts.map(d=>'<div class="draft-item"><div><strong>'+esc(d.title||"Sans titre")+'</strong><small>Modifié le '+date(d.updated_at)+'</small></div><div class="draft-actions"><button type="button" class="btn btn-light btn-small" data-draft-load="'+esc(d.id)+'">Ouvrir</button><button type="button" class="btn btn-quiet btn-small" data-draft-delete="'+esc(d.id)+'">Supprimer</button></div></div>').join("");}
+function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;currentDraftId=null;$("#articleForm").reset();renderDrafts();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
 function read(id){
  const a=rows.find(x=>x.id===id);if(!a)return;
  const ownsArticle=Boolean(user&&user.id===a.author_id);
@@ -662,6 +667,9 @@ $("#verifyLoginMfa").addEventListener("click",async()=>{
  if(result.error){notice("Code incorrect ou expiré.");return}
  pendingMfaFactor=null;$("#loginMfaDialog").close();await syncUser();if(hasAcceptedTerms())notice("Connexion sécurisée réussie.");
 });
+$("#saveDraft").addEventListener("click",()=>{if(!user){notice("Connecte-toi pour enregistrer un brouillon.");return}const title=$("#articleTitle").value.trim(),body=$("#articleBody").value.trim();if(!title&&!body){notice("Rédige au moins le titre ou le contenu.");return}const drafts=getDrafts(),entry={id:currentDraftId||crypto.randomUUID(),title,category:$("#articleCategory").value,excerpt:$("#articleExcerpt").value.trim(),body,updated_at:new Date().toISOString()};const idx=drafts.findIndex(d=>d.id===entry.id);if(idx>=0)drafts[idx]=entry;else drafts.unshift(entry);persistDrafts(drafts);currentDraftId=entry.id;renderDrafts();notice("Brouillon enregistré sur cet appareil.");});
+$("#refreshDrafts").addEventListener("click",renderDrafts);
+$("#draftsList").addEventListener("click",e=>{const lb=e.target.closest("[data-draft-load]"),db=e.target.closest("[data-draft-delete]");if(lb){const d=getDrafts().find(x=>x.id===lb.dataset.draftLoad);if(!d)return;currentDraftId=d.id;currentEditingId=null;$("#articleTitle").value=d.title||"";$("#articleCategory").value=d.category||"Autre";$("#articleExcerpt").value=d.excerpt||"";$("#articleBody").value=d.body||"";$("#articleDialog").querySelector("h2").textContent="Modifier le brouillon";$("#articleForm").querySelector('button[type="submit"]').textContent="Envoyer pour validation";notice("Brouillon ouvert.");}if(db){if(!confirm("Supprimer ce brouillon ?"))return;persistDrafts(getDrafts().filter(d=>d.id!==db.dataset.draftDelete));renderDrafts();notice("Brouillon supprimé.");}});
 $("#articleForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!user){notice("Connecte-toi pour envoyer une contribution.");return}
  const body=$("#articleBody").value.trim();if(body.length<30){notice("Ajoute au moins 30 caractères.");return}
@@ -670,7 +678,7 @@ $("#articleForm").addEventListener("submit",async e=>{
  const submission={...payload,article_id:currentEditingId||null,submission_type:wasEditing?"edit":"new",author_id:user.id,author_name:user.user_metadata?.display_name||"Savoir",status:"pending"};
  const result=await sb.from("article_submissions").insert(submission);
  if(result.error){notice("Envoi impossible : "+result.error.message);return}
- currentEditingId=null;$("#articleDialog").close();
+ currentEditingId=null;if(currentDraftId){persistDrafts(getDrafts().filter(d=>d.id!==currentDraftId));currentDraftId=null}$("#articleDialog").close();
  await loadNotifications();
  notice(wasEditing?"Modification envoyée à l’administration pour validation.":"Contribution envoyée à l’administration pour validation.");
 });
