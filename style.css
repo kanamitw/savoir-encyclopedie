@@ -1001,3 +1001,9 @@ body:not(.all-articles-view) .articles-section{
 /* Logo monochrome Savoir */
 .brand-mark{display:block;width:30px;height:30px;object-fit:contain;border:0!important;border-radius:0!important;background:transparent!important;color:inherit}
 .footer-brand .brand-mark{width:26px;height:26px}
+
+/* Brouillons de contribution */
+.drafts-panel{margin-top:16px;padding:13px;border:1px solid var(--line);border-radius:9px;background:var(--soft)}
+.drafts-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.drafts-heading strong{font:700 12px Manrope;color:var(--ink)}
+.drafts-list{display:grid;gap:8px;max-height:190px;overflow:auto}.draft-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;border:1px solid var(--line);border-radius:7px;background:var(--surface)}.draft-item strong{display:block;color:var(--ink);font-size:11px;overflow-wrap:anywhere}.draft-item small{display:block;color:var(--muted);font-size:9px;margin-top:4px}.draft-actions{display:flex;gap:5px;flex-shrink:0}.btn-small{font-size:10px;padding:7px 9px}
+body[data-theme="christmas"] .drafts-panel,body[data-theme="christmas"] .draft-item{background:#10271f!important;border-color:#b18a49!important}body[data-theme="christmas"] .drafts-heading strong,body[data-theme="christmas"] .draft-item strong{color:#fff1d5!important}
