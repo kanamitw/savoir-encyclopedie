@@ -50,7 +50,7 @@
       <label for="articleExcerpt">Résumé (facultatif)</label><input id="articleExcerpt" maxlength="180" placeholder="En quelques mots, de quoi parle cet article ?">
       <label for="articleBody">Contenu</label><textarea id="articleBody" rows="7" required minlength="30" placeholder="Explique le sujet clairement. Tu peux utiliser plusieurs paragraphes…"></textarea>
       <div class="form-note">Conseil : cite tes sources et privilégie des explications claires et vérifiables.</div>
-      <div class="modal-actions"><button type="button" class="btn btn-quiet" data-close="articleDialog">Annuler</button><button class="btn btn-dark" type="submit">Publier l'article ↗</button></div>
+      <section class="drafts-panel"><div class="drafts-heading"><strong>Mes brouillons</strong><button type="button" class="btn btn-light btn-small" id="refreshDrafts">Actualiser</button></div><div id="draftsList" class="drafts-list"><p class="form-note">Tes brouillons enregistrés sur cet appareil.</p></div></section><div class="modal-actions"><button type="button" class="btn btn-quiet" data-close="articleDialog">Annuler</button><button type="button" class="btn btn-light" id="saveDraft">Enregistrer en brouillon</button><button class="btn btn-dark" type="submit">Publier l'article ↗</button></div>
     </form>
   </dialog>
 
