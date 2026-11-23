@@ -152,6 +152,16 @@ async function handleNotificationOpen(item){
  try{await markOneNotificationRead(n);if(n.source==="ticket")await openTicketFromNotification(n)}
  catch(error){notice("Impossible d’ouvrir la notification : "+(error.message||"erreur inconnue"))}
 }
+async function loadActivityLog(){
+ if(!isAdmin())return;
+ const msg=$("#activityLogMessage"),list=$("#activityLogList"),btn=$("#refreshActivityLog");
+ if(btn)btn.disabled=true;if(msg)msg.textContent="Chargement du journal…";
+ try{const r=await sb.from("activity_log").select("*").order("created_at",{ascending:false}).limit(100);if(r.error)throw r.error;
+ const entries=r.data||[];if(msg)msg.textContent=entries.length+" événements récents";
+ list.innerHTML=entries.length?entries.map(x=>'<article class="activity-item"><div class="activity-item-top"><strong>'+esc(x.action)+'</strong><time>'+new Date(x.created_at).toLocaleString("fr-FR")+'</time></div><p>'+esc(x.entity_title||"")+'</p><small>'+esc(x.actor_name||"Utilisateur")+'</small></article>').join(""):'<p class="form-note">Aucune activité enregistrée pour le moment.</p>';
+ }catch(e){if(msg)msg.textContent="Journal indisponible : "+(e.message||"erreur");list.innerHTML="";}
+ finally{if(btn)btn.disabled=false}
+}
 function isAdmin(){return user?.app_metadata?.role==="admin"}
 function updateAdminMenu(){const item=$("#adminMenuItem");if(item){const visible=Boolean(user&&isAdmin());item.hidden=!visible;item.style.display=visible?"block":"none";item.setAttribute("aria-hidden",String(!visible));}const email=$("#adminAccountEmail");if(email)email.textContent=user?.email||"Compte administrateur"}
 function hasAcceptedTerms(u=user){return u?.user_metadata?.terms_version===TERMS_VERSION}
@@ -290,7 +300,7 @@ $("#adminContributionsList").addEventListener("click",async e=>{
   const reviewed=await sb.from("article_submissions").update(reviewUpdate).eq("id",submission.id).eq("status","pending").select("id").maybeSingle();
   if(reviewed.error)throw reviewed.error;
   if(!reviewed.data)throw new Error("Cette contribution a déjà été traitée.");
-  await loadAdminContributions();
+  await loadAdminContributions();await loadActivityLog();
   if(action==="approve")await load();
   notice(action==="approve"?"Contribution approuvée et publiée !":"Contribution refusée.");
  }catch(error){
