@@ -1,7 +1,7 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{flowType:"pkce",detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
 const TERMS_VERSION="1.0";
 const $=s=>document.querySelector(s);
-let favoritesView=false;
+let favoritesView=false,compareSelection=[];
 const FAVORITES_KEY="savoir-favorites-v1";
 function getFavorites(){try{return JSON.parse(localStorage.getItem(FAVORITES_KEY+(user?"-"+user.id:"-guest"))||"[]")}catch{return[]}}
 function toggleFavorite(id){const f=getFavorites();const next=f.includes(id)?f.filter(x=>x!==id):[...f,id];try{localStorage.setItem(FAVORITES_KEY+(user?"-"+user.id:"-guest"),JSON.stringify(next))}catch{}draw();}
@@ -17,7 +17,7 @@ function saveArticleClick(article){
  else history.push({id:article.id,category:article.category,title:article.title,count:1,last:Date.now()});
  try{localStorage.setItem(READING_KEY,JSON.stringify(history.slice(-100)))}catch{}
 }
-function articleCard(x){const fav=getFavorites().includes(x.id);return '<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><span class="article-actions"><button type="button" class="favorite-btn '+(fav?"is-favorite":"")+'" aria-label="'+(fav?"Retirer des favoris":"Ajouter aux favoris")+'" data-favorite-id="'+esc(x.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg></button><span class="article-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></span></div></article>'}
+function articleCard(x){const fav=getFavorites().includes(x.id),selected=compareSelection.includes(x.id);return '<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><span class="article-actions"><button type="button" class="compare-select-btn '+(selected?"is-selected":"")+'" data-compare-id="'+esc(x.id)+'" aria-label="'+(selected?"Retirer du comparateur":"Ajouter au comparateur")+'" title="Comparer">⇄</button><button type="button" class="favorite-btn '+(fav?"is-favorite":"")+'" aria-label="'+(fav?"Retirer des favoris":"Ajouter aux favoris")+'" data-favorite-id="'+esc(x.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg></button><span class="article-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></span></div></article>'}
 
 function renderRecommendations(){
  const panel=$("#recommendations"),grid=$("#recommendationGrid");if(!panel||!grid)return;
@@ -321,6 +321,12 @@ function getDrafts(){try{const d=JSON.parse(localStorage.getItem(draftStorageKey
 function persistDrafts(d){try{localStorage.setItem(draftStorageKey(),JSON.stringify(d))}catch{notice("Stockage local indisponible.");}}
 function renderDrafts(){const list=$("#draftsList");if(!list)return;const drafts=getDrafts();if(!drafts.length){list.innerHTML='<p class="form-note">Aucun brouillon enregistré.</p>';return}list.innerHTML=drafts.map(d=>'<div class="draft-item"><div><strong>'+esc(d.title||"Sans titre")+'</strong><small>Modifié le '+date(d.updated_at)+'</small></div><div class="draft-actions"><button type="button" class="btn btn-light btn-small" data-draft-load="'+esc(d.id)+'">Ouvrir</button><button type="button" class="btn btn-quiet btn-small" data-draft-delete="'+esc(d.id)+'">Supprimer</button></div></div>').join("");}
 function openWrite(){if(!user){$("#loginDialog").showModal();notice("Connecte-toi pour publier.");return}currentEditingId=null;currentDraftId=null;$("#articleForm").reset();renderDrafts();$("#articleDialog").querySelector("h2").textContent="Créer un article";$("#articleForm").querySelector('button[type="submit"]').textContent="Publier l'article ↗";$("#articleDialog").showModal()}
+
+function toggleCompareSelection(id){if(compareSelection.includes(id)){compareSelection=compareSelection.filter(x=>x!==id)}else{if(compareSelection.length>=2){notice("Sélectionne seulement deux articles.");return}compareSelection.push(id)}draw();if(compareSelection.length===2)openComparator();else notice("Article sélectionné pour la comparaison.")}
+function openComparator(){const chosen=compareSelection.map(id=>rows.find(a=>a.id===id)).filter(Boolean);if(chosen.length===2){renderComparator(chosen);$("#compareDialog").showModal()}}
+function renderComparator(list){const content=$("#compareContent");content.innerHTML='<div class="compare-grid">'+list.map((a,i)=>{const other=list[1-i],p=(a.body||"").split(/\\n\\s*\\n/).filter(Boolean),op=(other.body||"").split(/\\n\\s*\\n/).filter(Boolean);return '<section class="compare-column"><span class="tag">'+esc(a.category)+'</span><h3>'+esc(a.title)+'</h3><p class="compare-meta">Par '+esc(a.author_name)+' · '+date(a.created_at)+'</p><div class="compare-excerpt">'+esc(a.excerpt||"")+'</div><div class="compare-body">'+p.map(x=>'<p class="'+(op.includes(x)?"":"compare-difference")+'">'+esc(x)+'</p>').join("")+'</div></section>'}).join("")+'</div><p class="compare-legend"><span></span> Passage différent ou absent de l’autre article</p>'}
+$("#swapCompare").addEventListener("click",()=>{compareSelection.reverse();openComparator()});
+$("#clearCompare").addEventListener("click",()=>{compareSelection=[];$("#compareDialog").close();draw();notice("Sélection effacée.")});
 function read(id){
  const a=rows.find(x=>x.id===id);if(!a)return;
  const ownsArticle=Boolean(user&&user.id===a.author_id);
@@ -371,7 +377,7 @@ document.addEventListener("click",async e=>{
    $("#readDialog").close();await load();notice("Article supprimé.");return;
   }
  }
- const card=e.target.closest(".article-card");if(card&&!e.target.closest("[data-favorite-id]")){const article=rows.find(x=>x.id===card.dataset.id);if(article){saveArticleClick(article);renderRecommendations();read(card.dataset.id)}}
+ const compareButton=e.target.closest("[data-compare-id]");if(compareButton){e.preventDefault();e.stopPropagation();toggleCompareSelection(compareButton.dataset.compareId);return;}const card=e.target.closest(".article-card");if(card&&!e.target.closest("[data-favorite-id]")&&!e.target.closest("[data-compare-id]")){const article=rows.find(x=>x.id===card.dataset.id);if(article){saveArticleClick(article);renderRecommendations();read(card.dataset.id)}}
  const close=e.target.closest("[data-close]");if(close)$("#"+close.dataset.close).close();
 });
 document.querySelector(".brand")?.addEventListener("click",e=>{
