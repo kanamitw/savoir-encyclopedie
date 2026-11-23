@@ -130,6 +130,7 @@
         </table>
       </div>
       <button type="button" class="btn btn-light full" id="loadMoreAdminUsers" hidden>Afficher plus</button>
+    <section class="admin-users-section activity-section"><div class="admin-users-heading"><div><h3>Journal d’activité</h3><p id="activityLogMessage" class="form-note">Historique des actions sur Savoir.</p></div><button type="button" class="btn btn-light" id="refreshActivityLog">Actualiser</button></div><div id="activityLogList" class="activity-log-list"></div></section>
     </section>
   </dialog>
   <dialog id="loginMfaDialog" class="modal"><div class="modal-head"><div><div class="eyebrow">SÉCURITÉ</div><h2>Vérification en deux étapes</h2></div></div><p class="muted">Saisis le code à 6 chiffres de ton application d'authentification.</p><label for="loginMfaCode">Code de vérification</label><input id="loginMfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"><button type="button" class="btn btn-dark full" id="verifyLoginMfa">Vérifier</button></dialog>
