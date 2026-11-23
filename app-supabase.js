@@ -1,7 +1,11 @@
 const sb=window.supabase.createClient(window.SUPABASE_URL,window.SUPABASE_ANON_KEY,{auth:{flowType:"pkce",detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});
 const TERMS_VERSION="1.0";
 const $=s=>document.querySelector(s);
-let favoritesView=false;\nconst FAVORITES_KEY="savoir-favorites-v1";\nfunction getFavorites(){try{return JSON.parse(localStorage.getItem(FAVORITES_KEY+(user?"-"+user.id:"-guest"))||"[]")}catch{return[]}}\nfunction toggleFavorite(id){const f=getFavorites();const next=f.includes(id)?f.filter(x=>x!==id):[...f,id];try{localStorage.setItem(FAVORITES_KEY+(user?"-"+user.id:"-guest"),JSON.stringify(next))}catch{}draw();}\nlet rows=[],user=null,currentDraftId=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,allArticlesView=window.location.hash==="#articles",adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="",adminContributions=[],adminContributionsLoading=false,adminContributionsError="",recoveryLinkPending=new URLSearchParams(window.location.search).has("code")||new URLSearchParams(window.location.hash.slice(1)).get("type")==="recovery";
+let favoritesView=false;
+const FAVORITES_KEY="savoir-favorites-v1";
+function getFavorites(){try{return JSON.parse(localStorage.getItem(FAVORITES_KEY+(user?"-"+user.id:"-guest"))||"[]")}catch{return[]}}
+function toggleFavorite(id){const f=getFavorites();const next=f.includes(id)?f.filter(x=>x!==id):[...f,id];try{localStorage.setItem(FAVORITES_KEY+(user?"-"+user.id:"-guest"),JSON.stringify(next))}catch{}draw();}
+let rows=[],user=null,currentDraftId=null,category="Tous",query="",currentEditingId=null,recommendationsLimit=5,allArticlesView=window.location.hash==="#articles",adminUsers=[],adminUsersPage=0,adminUsersHasMore=false,adminUsersLoading=false,adminUsersError="",adminContributions=[],adminContributionsLoading=false,adminContributionsError="",recoveryLinkPending=new URLSearchParams(window.location.search).has("code")||new URLSearchParams(window.location.hash.slice(1)).get("type")==="recovery";
 const esc=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function notice(s){const t=$("#toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2500)}
 function date(s){return new Date(s).toLocaleDateString("fr-FR",{day:"numeric",month:"short",year:"numeric"})}
@@ -49,7 +53,8 @@ function draw(){
  else list.sort((x,y)=>new Date(y.created_at)-new Date(x.created_at));
  $("#articleCount").textContent=rows.length;
  $("#contributorCount").textContent=new Set(rows.map(x=>x.author_id).filter(Boolean)).size;
- $("#articleGrid").innerHTML=list.map(articleCard).join("");\n const favBtn=$("#showFavorites");if(favBtn){favBtn.textContent=favoritesView?"★ Articles":"☆ Favoris";favBtn.classList.toggle("is-active",favoritesView)}
+ $("#articleGrid").innerHTML=list.map(articleCard).join("");
+ const favBtn=$("#showFavorites");if(favBtn){favBtn.textContent=favoritesView?"★ Articles":"☆ Favoris";favBtn.classList.toggle("is-active",favoritesView)}
  $("#articleGrid").hidden=!allArticlesView;
  $("#emptyState").hidden=!allArticlesView||list.length>0;
  const toolbar=$("#allArticlesToolbar");
@@ -698,7 +703,9 @@ $("#notificationList").addEventListener("click",e=>{const item=e.target.closest(
 $("#notificationList").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-notification-id]")){e.preventDefault();handleNotificationOpen(e.target)}});
 $("#markNotificationsRead").addEventListener("click",markNotificationsRead);
 document.addEventListener("click",e=>{if(!e.target.closest(".notification-wrap")){$("#notificationPanel").hidden=true;$("#notificationToggle").setAttribute("aria-expanded","false")}});
-$("#resetSearch").addEventListener("click",()=>{query="";category="Tous";favoritesView=false;$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});\n$("#showFavorites").addEventListener("click",()=>{favoritesView=!favoritesView;allArticlesView=true;window.history.pushState({view:"articles"},"","#articles");draw();window.scrollTo({top:0,behavior:"smooth"});});\ndocument.addEventListener("click",e=>{const b=e.target.closest("[data-favorite-id]");if(b){e.preventDefault();e.stopPropagation();toggleFavorite(b.dataset.favoriteId);notice(getFavorites().includes(b.dataset.favoriteId)?"Article ajouté aux favoris":"Article retiré des favoris");}});
+$("#resetSearch").addEventListener("click",()=>{query="";category="Tous";favoritesView=false;$("#searchInput").value="";$("#categorySelect").value="Tous";draw()});
+$("#showFavorites").addEventListener("click",()=>{favoritesView=!favoritesView;allArticlesView=true;window.history.pushState({view:"articles"},"","#articles");draw();window.scrollTo({top:0,behavior:"smooth"});});
+document.addEventListener("click",e=>{const b=e.target.closest("[data-favorite-id]");if(b){e.preventDefault();e.stopPropagation();toggleFavorite(b.dataset.favoriteId);notice(getFavorites().includes(b.dataset.favoriteId)?"Article ajouté aux favoris":"Article retiré des favoris");}});
 $("#showMoreRecommendations").addEventListener("click",()=>{query="";$("#searchInput").value="";allArticlesView=true;window.history.pushState({view:"articles"},"","#articles");draw();window.scrollTo({top:0,behavior:"smooth"})});
 document.addEventListener("click",e=>{if(e.target.closest("#backToRecommendations")){allArticlesView=false;query="";$("#searchInput").value="";category="Tous";$("#categorySelect").value="Tous";history.pushState({view:"home"},"",window.location.pathname+window.location.search);draw();window.scrollTo({top:0,behavior:"smooth"})}});
 
