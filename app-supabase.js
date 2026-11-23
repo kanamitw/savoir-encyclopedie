@@ -371,7 +371,7 @@ document.addEventListener("click",async e=>{
    $("#readDialog").close();await load();notice("Article supprimé.");return;
   }
  }
- const card=e.target.closest(".article-card");if(card){const article=rows.find(x=>x.id===card.dataset.id);if(article){saveArticleClick(article);renderRecommendations();read(card.dataset.id)}}
+ const card=e.target.closest(".article-card");if(card&&!e.target.closest("[data-favorite-id]")){const article=rows.find(x=>x.id===card.dataset.id);if(article){saveArticleClick(article);renderRecommendations();read(card.dataset.id)}}
  const close=e.target.closest("[data-close]");if(close)$("#"+close.dataset.close).close();
 });
 document.querySelector(".brand")?.addEventListener("click",e=>{
