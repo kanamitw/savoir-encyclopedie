@@ -212,7 +212,7 @@ async function loadAdminUsers(reset=false){
  }finally{adminUsersLoading=false;$("#refreshAdminUsers").disabled=false;$("#loadMoreAdminUsers").disabled=false;renderAdminUsers()}
 }
 $("#adminUsersSearch").addEventListener("input",renderAdminUsers);
-$("#refreshAdminUsers").addEventListener("click",()=>loadAdminUsers(true));
+$("#refreshAdminUsers").addEventListener("click",()=>loadAdminUsers(true));\n$("#refreshActivityLog").addEventListener("click",loadActivityLog);
 $("#loadMoreAdminUsers").addEventListener("click",()=>loadAdminUsers(false));
 
 $("#adminUsersTable").addEventListener("click",async e=>{
