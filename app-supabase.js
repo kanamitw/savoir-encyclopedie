@@ -17,7 +17,8 @@ function saveArticleClick(article){
  else history.push({id:article.id,category:article.category,title:article.title,count:1,last:Date.now()});
  try{localStorage.setItem(READING_KEY,JSON.stringify(history.slice(-100)))}catch{}
 }
-function articleCard(x){const fav=getFavorites().includes(x.id);return '<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><button type="button" class="favorite-btn '"+(fav?"is-favorite":"")+"'" aria-label="'"+(fav?"Retirer des favoris":"Ajouter aux favoris")+"'" data-favorite-id="'"+esc(x.id)+"'">'"+(fav?"★":"☆")+"'</button><span class="article-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></div></article>'}
+function articleCard(x){const fav=getFavorites().includes(x.id);return '<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><button type="button" class="favorite-btn '+(fav?"is-favorite":"")+'" aria-label="'+(fav?"Retirer des favoris":"Ajouter aux favoris")+'" data-favorite-id="'+esc(x.id)+'">'+(fav?"★":"☆")+'</button><span class="article-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></div></article>'}
+
 function renderRecommendations(){
  const panel=$("#recommendations"),grid=$("#recommendationGrid");if(!panel||!grid)return;
  const history=getReadingHistory().filter(h=>rows.some(a=>a.id===h.id));
