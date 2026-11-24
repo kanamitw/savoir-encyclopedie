@@ -17,7 +17,17 @@ function saveArticleClick(article){
  else history.push({id:article.id,category:article.category,title:article.title,count:1,last:Date.now()});
  try{localStorage.setItem(READING_KEY,JSON.stringify(history.slice(-100)))}catch{}
 }
-function articleCard(x){const fav=getFavorites().includes(x.id),selected=compareSelection.includes(x.id);return '<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><span class="article-actions"><button type="button" class="compare-select-btn '+(selected?"is-selected":"")+'" data-compare-id="'+esc(x.id)+'" aria-label="'+(selected?"Retirer du comparateur":"Ajouter au comparateur")+'" title="Comparer">⇄</button><button type="button" class="favorite-btn '+(fav?"is-favorite":"")+'" aria-label="'+(fav?"Retirer des favoris":"Ajouter aux favoris")+'" data-favorite-id="'+esc(x.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg></button><span class="article-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></span></div></article>'}
+
+const FOLLOW_KEY="savoir-followed-categories-v1", FOLLOW_NOTICES_KEY="savoir-follow-notices-v1", FOLLOW_CURSOR_KEY="savoir-follow-cursor-v1";
+function followKey(){return FOLLOW_KEY+"-"+(user?.id||"guest")}
+function followedCategories(){try{return JSON.parse(localStorage.getItem(followKey())||"[]")}catch{return[]}}
+function saveFollowedCategories(arr){localStorage.setItem(followKey(),JSON.stringify([...new Set(arr)]));renderFollowCategories()}
+function followNoticeKey(){return FOLLOW_NOTICES_KEY+"-"+(user?.id||"guest")}
+function getFollowNotices(){try{return JSON.parse(localStorage.getItem(followNoticeKey())||"[]")}catch{return[]}}
+function saveFollowNotices(arr){localStorage.setItem(followNoticeKey(),JSON.stringify(arr.slice(0,100)))}
+function renderFollowCategories(){const box=$("#followCategoryList");if(!box)return;const cats=[...new Set(rows.map(a=>a.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));const follows=followedCategories();box.innerHTML=cats.map(c=>'<label class="follow-category-option"><input type="checkbox" data-follow-category="'+esc(c)+'" '+(follows.includes(c)?"checked":"")+'><span>'+esc(c)+'</span></label>').join("")||'<p class="notification-empty">Aucun thème disponible.</p>'}
+async function checkFollowedArticles(){if(!user)return;const follows=followedCategories();if(!follows.length)return;const cursorKey=FOLLOW_CURSOR_KEY+"-"+user.id;let cursor=localStorage.getItem(cursorKey);const now=new Date().toISOString();if(!cursor){localStorage.setItem(cursorKey,now);return;}const fresh=rows.filter(a=>follows.includes(a.category)&&new Date(a.created_at)>new Date(cursor));if(fresh.length){const known=new Set(getFollowNotices().map(n=>n.article_id));const notices=fresh.filter(a=>!known.has(a.id)).map(a=>({id:"follow-"+a.id,article_id:a.id,title:"Nouvel article · "+a.category,message:"« "+a.title+" » vient d’être publié.",created_at:a.created_at,read:false,source:"follow"}));saveFollowNotices([...notices,...getFollowNotices()]);}localStorage.setItem(cursorKey,now);}
+\nfunction articleCard(x){const fav=getFavorites().includes(x.id),selected=compareSelection.includes(x.id);return '<article class="article-card" data-id="'+esc(x.id)+'"><div class="article-top"><span class="tag">'+esc(x.category)+'</span><span class="article-date">'+date(x.created_at)+'</span></div><h3>'+esc(x.title)+'</h3><p>'+esc(x.excerpt||x.body.slice(0,115))+'</p><div class="article-bottom"><span>Par '+esc(x.author_name)+'</span><span class="article-actions"><button type="button" class="compare-select-btn '+(selected?"is-selected":"")+'" data-compare-id="'+esc(x.id)+'" aria-label="'+(selected?"Retirer du comparateur":"Ajouter au comparateur")+'" title="Comparer">⇄</button><button type="button" class="favorite-btn '+(fav?"is-favorite":"")+'" aria-label="'+(fav?"Retirer des favoris":"Ajouter aux favoris")+'" data-favorite-id="'+esc(x.id)+'"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg></button><span class="article-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M7 17 17 7M7 7h10v10"/></svg></span></span></div></article>'}
 
 function renderRecommendations(){
  const panel=$("#recommendations"),grid=$("#recommendationGrid");if(!panel||!grid)return;
@@ -76,7 +86,7 @@ function draw(){
  const controls=document.querySelector(".sort-controls");if(controls)controls.hidden=!allArticlesView;
  renderRecommendations();
 }
-async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];draw()}
+async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];await checkFollowedArticles();draw()}
 const NOTIFICATION_READ_KEY="savoir-notifications-read-v1";
 let siteNotifications=[],notificationChannel=null;
 function notificationReadIds(){try{return JSON.parse(localStorage.getItem(NOTIFICATION_READ_KEY+"-"+user.id)||"[]")}catch{return[]}}
@@ -104,7 +114,7 @@ async function loadNotifications(){
    const pending=s.status==="pending";
    return {id:s.id,source:"contribution",ticket_id:null,read:readIds.has(s.id),title:pending?(isAdmin()?"Contribution à valider":"Contribution envoyée"):(s.status==="approved"?"Contribution approuvée":"Contribution refusée"),message:pending?(isAdmin()?"Un article attend ta validation : "+s.title:"Ta contribution « "+s.title+" » est en attente de validation."):(s.status==="approved"?"Ta contribution « "+s.title+" » a été approuvée et publiée.":"Ta contribution « "+s.title+" » n’a pas été retenue."),created_at:s.reviewed_at||s.created_at};
   });
-  siteNotifications=[...ticketItems,...contributionItems].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,60);
+  siteNotifications=[...ticketItems,...contributionItems,...getFollowNotices()].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,60);
  }catch(error){console.error("Chargement des notifications impossible :",error);siteNotifications=[]}
  renderNotifications();
 }
@@ -155,7 +165,7 @@ async function openTicketFromNotification(n){
 async function handleNotificationOpen(item){
  const n=siteNotifications.find(x=>x.id===item.dataset.notificationId);
  if(!n)return;
- try{await markOneNotificationRead(n);if(n.source==="ticket")await openTicketFromNotification(n)}
+ try{await markOneNotificationRead(n);if(n.source==="ticket")await openTicketFromNotification(n);if(n.source==="follow"){const a=rows.find(x=>x.id===n.article_id);if(a)openArticle(a.id)}}
  catch(error){notice("Impossible d’ouvrir la notification : "+(error.message||"erreur inconnue"))}
 }
 async function loadActivityLog(){
@@ -705,7 +715,7 @@ $("#articleForm").addEventListener("submit",async e=>{
  await loadNotifications();
  notice(wasEditing?"Modification envoyée à l’administration pour validation.":"Contribution envoyée à l’administration pour validation.");
 });
-$("#notificationToggle").addEventListener("click",async()=>{const panel=$("#notificationPanel"),opening=panel.hidden;panel.hidden=!opening;$("#notificationToggle").setAttribute("aria-expanded",String(opening));if(opening)await loadNotifications()});
+$("#followCategoryList").addEventListener("change",e=>{const input=e.target.closest("[data-follow-category]");if(!input)return;const set=new Set(followedCategories());if(input.checked)set.add(input.dataset.followCategory);else set.delete(input.dataset.followCategory);saveFollowedCategories([...set]);notice(input.checked?"Thème suivi.":"Thème retiré.");});\n$("#manageFollowCategories").addEventListener("click",()=>{const box=$("#followCategorySettings");box.hidden=!box.hidden;renderFollowCategories();});\n$("#notificationToggle").addEventListener("click",async()=>{const panel=$("#notificationPanel"),opening=panel.hidden;panel.hidden=!opening;$("#notificationToggle").setAttribute("aria-expanded",String(opening));if(opening)await loadNotifications()});
 $("#notificationList").addEventListener("click",e=>{const item=e.target.closest("[data-notification-id]");if(item)handleNotificationOpen(item)});
 $("#notificationList").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-notification-id]")){e.preventDefault();handleNotificationOpen(e.target)}});
 $("#markNotificationsRead").addEventListener("click",markNotificationsRead);
