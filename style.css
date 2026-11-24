@@ -1029,3 +1029,10 @@ body[data-theme="christmas"] .drafts-panel,body[data-theme="christmas"] .draft-i
 
 /* Suivi des thèmes et notifications de publication */
 .notification-panel-actions{display:flex;align-items:center;gap:8px}.notification-panel-actions button{white-space:nowrap}.follow-category-settings{padding:12px 15px;border-bottom:1px solid var(--line);background:var(--soft)}.follow-category-settings p{font-size:11px;line-height:1.5;color:var(--muted);margin:0 0 10px}.follow-category-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:190px;overflow:auto}.follow-category-option{display:flex;align-items:center;gap:8px;padding:7px 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface);font-size:11px;color:var(--ink)}.follow-category-option input{accent-color:var(--accent)}@media(max-width:420px){.follow-category-list{grid-template-columns:1fr}.notification-panel-actions{gap:4px}.notification-panel-actions button{font-size:9px}}
+
+/* Design compact et harmonisé des thèmes suivis */
+.settings-modal .follow-category-list{grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px;max-height:230px;padding:2px}
+.settings-modal .follow-category-option{display:flex!important;align-items:center;gap:10px;width:100%;min-width:0;margin:0!important;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-size:11px;font-weight:500;color:var(--ink);cursor:pointer;transition:border-color .18s,background .18s,transform .18s;}
+.settings-modal .follow-category-option:hover{border-color:var(--accent);background:var(--soft);transform:translateY(-1px)}
+.settings-modal .follow-category-option input{appearance:auto;width:16px!important;height:16px!important;flex:0 0 16px;margin:0!important;padding:0;border:0;border-radius:4px;accent-color:var(--accent)}
+.settings-modal .follow-category-option span{min-width:0;overflow-wrap:anywhere}
