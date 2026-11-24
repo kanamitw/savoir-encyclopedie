@@ -717,7 +717,7 @@ $("#articleForm").addEventListener("submit",async e=>{
  notice(wasEditing?"Modification envoyée à l’administration pour validation.":"Contribution envoyée à l’administration pour validation.");
 });
 $("#followCategoryList").addEventListener("change",e=>{const input=e.target.closest("[data-follow-category]");if(!input)return;const set=new Set(followedCategories());if(input.checked)set.add(input.dataset.followCategory);else set.delete(input.dataset.followCategory);saveFollowedCategories([...set]);notice(input.checked?"Thème suivi.":"Thème retiré.");});
-$("#manageFollowCategories").addEventListener("click",()=>{const box=$("#followCategorySettings");box.hidden=!box.hidden;renderFollowCategories();});
+renderFollowCategories();
 $("#notificationToggle").addEventListener("click",async()=>{const panel=$("#notificationPanel"),opening=panel.hidden;panel.hidden=!opening;$("#notificationToggle").setAttribute("aria-expanded",String(opening));if(opening)await loadNotifications()});
 $("#notificationList").addEventListener("click",e=>{const item=e.target.closest("[data-notification-id]");if(item)handleNotificationOpen(item)});
 $("#notificationList").addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches("[data-notification-id]")){e.preventDefault();handleNotificationOpen(e.target)}});
