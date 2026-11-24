@@ -87,7 +87,7 @@ function draw(){
  const controls=document.querySelector(".sort-controls");if(controls)controls.hidden=!allArticlesView;
  renderRecommendations();
 }
-async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];await checkFollowedArticles();draw()}
+async function load(){const r=await sb.from("articles").select("*").order("created_at",{ascending:false});if(r.error){notice("Erreur de chargement des articles.");return}rows=r.data||[];renderFollowCategories();await checkFollowedArticles();draw()}
 const NOTIFICATION_READ_KEY="savoir-notifications-read-v1";
 let siteNotifications=[],notificationChannel=null;
 function notificationReadIds(){try{return JSON.parse(localStorage.getItem(NOTIFICATION_READ_KEY+"-"+user.id)||"[]")}catch{return[]}}
