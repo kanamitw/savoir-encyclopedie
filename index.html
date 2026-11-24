@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=67">
+  <link rel="stylesheet" href="style.css?v=68">
 </head>
 <body>
   <header class="topbar">
@@ -20,7 +20,7 @@
         <span class="notification-badge" id="notificationBadge" hidden>0</span>
       </button>
       <section class="notification-panel" id="notificationPanel" hidden aria-label="Notifications">
-        <div class="notification-panel-head"><strong>Notifications</strong><button type="button" id="markNotificationsRead">Tout marquer comme lu</button></div>
+        <div class="notification-panel-head"><strong>Notifications</strong><div class="notification-panel-actions"><button type="button" id="manageFollowCategories">Suivre des thèmes</button><button type="button" id="markNotificationsRead">Tout marquer comme lu</button></div></div><section class="follow-category-settings" id="followCategorySettings" hidden><p>Choisis les thèmes qui t’intéressent. Tu recevras une notification lorsqu’un nouvel article est publié dans ces catégories.</p><div id="followCategoryList" class="follow-category-list"></div></section>
         <div class="notification-list" id="notificationList"><p class="notification-empty">Connecte-toi pour voir tes notifications.</p></div>
       </section>
     </div>
@@ -138,6 +138,6 @@
   <div id="toast" class="toast" role="status"></div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
-  <script src="app-supabase.js?v=65"></script>
+  <script src="app-supabase.js?v=66"></script>
 </body>
 </html>
