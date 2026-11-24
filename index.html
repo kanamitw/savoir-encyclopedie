@@ -20,8 +20,7 @@
         <span class="notification-badge" id="notificationBadge" hidden>0</span>
       </button>
       <section class="notification-panel" id="notificationPanel" hidden aria-label="Notifications">
-        <div class="notification-panel-head"><strong>Notifications</strong><div class="notification-panel-actions"><button type="button" id="manageFollowCategories">Suivre des thèmes</button><button type="button" id="markNotificationsRead">Tout marquer comme lu</button></div></div><section class="follow-category-settings" id="followCategorySettings" hidden><p>Choisis les thèmes qui t’intéressent. Tu recevras une notification lorsqu’un nouvel article est publié dans ces catégories.</p><div id="followCategoryList" class="follow-category-list"></div></section>
-        <div class="notification-list" id="notificationList"><p class="notification-empty">Connecte-toi pour voir tes notifications.</p></div>
+        <div class="notification-panel-head"><strong>Notifications</strong><div class="notification-panel-actions"><button type="button" id="markNotificationsRead">Tout marquer comme lu</button></div></div><div class="notification-list" id="notificationList"><p class="notification-empty">Connecte-toi pour voir tes notifications.</p></div>
       </section>
     </div>
     <div class="menu-wrap">
@@ -92,7 +91,7 @@
   </dialog>
   <dialog id="settingsDialog" class="modal settings-modal">
     <div class="modal-head"><div><div class="eyebrow">PERSONNALISATION</div><h2>Réglages</h2></div><button type="button" class="close-btn" data-close="settingsDialog">×</button></div>
-    <p class="settings-description">Choisis l'apparence du site.</p>
+    <p class="settings-description">Choisis l'apparence du site.</p><section class="account-section"><h3>Suivre des thèmes</h3><p class="form-note">Choisis les thèmes qui t’intéressent pour recevoir une notification lorsqu’un nouvel article y est publié.</p><div id="followCategoryList" class="follow-category-list"></div></section>
     <div class="theme-options" role="group" aria-label="Thème du site">
       <button type="button" class="theme-option" data-theme-choice="light" aria-pressed="false"><span class="theme-preview preview-light"></span><span>Clair</span></button>
       <button type="button" class="theme-option" data-theme-choice="dark" aria-pressed="false"><span class="theme-preview preview-dark"></span><span>Sombre</span></button>
