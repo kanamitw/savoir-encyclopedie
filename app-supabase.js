@@ -165,7 +165,7 @@ async function openTicketFromNotification(n){
 async function handleNotificationOpen(item){
  const n=siteNotifications.find(x=>x.id===item.dataset.notificationId);
  if(!n)return;
- try{await markOneNotificationRead(n);if(n.source==="ticket")await openTicketFromNotification(n);if(n.source==="follow"){const a=rows.find(x=>x.id===n.article_id);if(a)openArticle(a.id)}}
+ try{await markOneNotificationRead(n);if(n.source==="ticket")await openTicketFromNotification(n);if(n.source==="follow"){saveFollowNotices(getFollowNotices().map(x=>x.id===n.id?({...x,read:true}):x));const a=rows.find(x=>x.id===n.article_id);if(a)read(a.id)}}
  catch(error){notice("Impossible d’ouvrir la notification : "+(error.message||"erreur inconnue"))}
 }
 async function loadActivityLog(){
