@@ -433,7 +433,7 @@ document.querySelectorAll("[data-theme-choice]").forEach(b=>b.addEventListener("
 
 
 document.addEventListener("click",e=>{const author=e.target.closest("[data-author-id]");if(author){e.stopPropagation();showProfile(author.dataset.authorId);return;}const pa=e.target.closest("[data-profile-article]");if(pa){$("#profileDialog").close();read(pa.dataset.profileArticle);}});
-$("#saveProfile").addEventListener("click",async()=>{if(!user)return;const bio=$("#profileBioEdit").value.trim(),avatar=$("#profileAvatarEdit").value.trim();if(avatar&&!/^https?:\\/\\//i.test(avatar)){notice("L’URL de photo doit commencer par http:// ou https://");return}const result=await sb.from("profiles").upsert({id:user.id,username:user.user_metadata?.display_name||"Membre",bio,avatar_url:avatar},{onConflict:"id"});if(result.error){notice("Enregistrement du profil impossible.");return}notice("Profil enregistré.");});\n$("#saveUsername").addEventListener("click",async()=>{
+$("#saveProfile").addEventListener("click",async()=>{if(!user)return;const bio=$("#profileBioEdit").value.trim(),avatar=$("#profileAvatarEdit").value.trim();if(avatar&&!(avatar.startsWith("http://")||avatar.startsWith("https://"))){notice("L’URL de photo doit commencer par http:// ou https://");return}const result=await sb.from("profiles").upsert({id:user.id,username:user.user_metadata?.display_name||"Membre",bio,avatar_url:avatar},{onConflict:"id"});if(result.error){notice("Enregistrement du profil impossible.");return}notice("Profil enregistré.");});\n$("#saveUsername").addEventListener("click",async()=>{
  if(!user)return;
  const name=$("#accountUsername").value.trim();
  if(name.length<2){notice("Le pseudo doit contenir au moins 2 caractères.");return}
